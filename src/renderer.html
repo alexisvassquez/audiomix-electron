@@ -8,18 +8,44 @@
   <style>
     :root { color-scheme: dark; }
     body {
-      margin:0;
-      background:#111;
-      color:#eee;
-      font-family:system-ui, sans-serif;
-      display:grid;
-      place-items:center;
-      height:100vh;
+      margin: 0;
+      background: #111;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      display: grid;
+      place-items: center;
+      height: 100vh;
     }
+    .status {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #181818;
+      border: 1px solid #2a2a2a;
+      padding: 6px 10px;
+      font-size: 10px;
+      opacity: 0.9;
+    }
+    .status .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #5c5c5c;
+      box-shadow: 0 0 0 1px #000 inset;
+      transition: background 180ms ease, box-shadow 180ms ease;
+    }
+    .status.ok .dot { background: #2ecc71; }    /* green */
+    .status.err .dot { background: #e74c3c; }   /* red   */
+    .status .label strong { font-weight: 700; }
   </style>
 </head>
 <body>
   <h1>🎧  AudioMIX's First Breath</h1>
+  <div class="status" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="label">backend: <strong id="status-label">checking...</strong></span>
+  </div>
   <script src="renderer.js" defer></script>
 </body>
 </html>
