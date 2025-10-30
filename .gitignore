@@ -1,0 +1,32 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Build artifacts
+dist/
+build/
+out/
+*.asar
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# Electron cache / binaries
+.cache/
+.electron/
+
+# VS Code / IDE metadata
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
