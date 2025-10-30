@@ -16,11 +16,12 @@ It’s designed with security, modularity, and extensibility in mind.
 ## Project Structure
 ```audiomix-electron/
 ├── src/
-│ ├── main.js     # Electron main process: creates BrowserWindow, manages lifecycle
-│ ├── renderer.html     # Renderer: minimal dark-mode UI shell (for now)
-│ └── preload.cjs     # (WIP) Secure IPC bridge: exposes limited API surface
-├── package.json    # Project manifest
-└── README.md
+│   ├── main.js           # Electron main process: creates BrowserWindow, manages lifecycle
+│   ├── preload.cjs       # Secure IPC bridge: exposes limited API surface to renderer
+│   ├── renderer.html     # Renderer: dark-mode UI shell and layout root
+│   └── renderer.js       # Frontend controller logic (status bar, heartbeat, events)
+├── package.json          # Project manifest and scripts
+└── README.md             # Documentation and setup guide
 ```
 
 ---
