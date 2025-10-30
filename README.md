@@ -46,6 +46,7 @@ npm start
 Electron will launch a 1100x720 dark window title **“🎧 AudioMIX’s First Breath.”**
 
 ---
+
 ## 🛠️  Technical Stack
 | Layer                    | Technology                | Purpose                         |
 | ------------------------ | ------------------------- | ------------------------------- |
@@ -75,14 +76,6 @@ Electron will launch a 1100x720 dark window title **“🎧 AudioMIX’s First B
 - no `nodeIntegration` in the UI layer
 
 Sensitive logic lives in the backend or preload bridge only.
-
-| Layer                    | Technology                | Purpose                         |
-| ------------------------ | ------------------------- | ------------------------------- |
-| **UI Shell**             | Electron v39              | Cross-platform desktop runtime  |
-| **Renderer**             | HTML5 + CSS3              | Minimal static interface        |
-| **Backend Interface**    | Node IPC / Preload bridge | Secure communication layer      |
-| **API Gateway (future)** | FastAPI + WebSocket       | Live control, audio/midi events |
-| **Language Stack**       | JS (ESM), Python, C++     | Hybrid performance architecture |
 
 ---
 
