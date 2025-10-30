@@ -1,0 +1,13 @@
+{
+  "name": "audiomix-electron",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^39.0.0"
+  }
+}
