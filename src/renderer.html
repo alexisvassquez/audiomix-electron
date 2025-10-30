@@ -3,49 +3,172 @@
 <head>
   <meta charset="utf-8" />
   <title>AudioMIX Electron UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
   <style>
-    :root { color-scheme: dark; }
+    :root { 
+      color-scheme: dark;
+      --sb-bg: #1b1b1b;
+      --sb-fg: #d8d8d8;
+      --sb-border: #2a2a2a;
+      --sb-accent: #2ecc71;    /* online green */
+      --sb-danger: #e74c3c;    /* error red    */
+      --sb-muted: #5c5c5c;     /* neutral      */
+      --sb-gap: 10px;
+      --sb-height: 28px;
+      --sb-pad-x: 10px;
+      --sb-font: 11px system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
     body {
       margin: 0;
       background: #111;
       color: #eee;
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, sans-serif;
       display: grid;
       place-items: center;
-      height: 100vh;
     }
-    .status {
+
+    .statusbar {
       position: fixed;
-      bottom: 14px;
-      right: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      left: 0; right: 0; bottom: 0;
+      height: var(--sb-height);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--sb-bg); color: var(--sb-fg);
+      border-top: 1px solid var(--sb-border);
+      padding: 0 var(--sb-gap);
+      font: var(--sb-font);
+      user-select: none;
+      z-index: 9999;
+    }
+
+    .sb-left, .sb-right {
+      display: inline-flex; 
+      align-items: center; 
+      gap: var(--sb-gap);
+    }
+
+    .sb-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 var(--sb-pad-x);
+      height: calc(var(--sb-height) - 6px);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--sb-fg);
+      opacity: 0.95;
+    }
+    .sb-item:hover {
+      background: #232323;
+      border-color: #2e2e2e;
+    }
+    .sb-item .ico {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      opacity: .9;
+    }
+
+    /* Health indicator button behaves like a pill */
+    .sb-health {
       background: #181818;
-      border: 1px solid #2a2a2a;
-      padding: 6px 10px;
-      font-size: 10px;
-      opacity: 0.9;
+      border-color: var(--sb-border);
+      cursor: pointer;
     }
-    .status .dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #5c5c5c;
+    .sb-health:focus-visible {
+      outline: 2px solid #3a74ff;
+      outline-offset: 1px;
+    }
+
+    /* Dot state */
+    .sb-health .dot {
+      width: 9px; 
+      height: 9px; 
+      border-radius: 50%;
+      background: var(--sb-muted);
       box-shadow: 0 0 0 1px #000 inset;
-      transition: background 180ms ease, box-shadow 180ms ease;
+      transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
     }
-    .status.ok .dot { background: #2ecc71; }    /* green */
-    .status.err .dot { background: #e74c3c; }   /* red   */
-    .status .label strong { font-weight: 700; }
+
+    /* Online/ERR states toggled by JS */
+    .sb-health.ok .dot { background: var(--sb-accent); }
+    .sb-health.err .dot { background: var(--sb-danger); }
+    
+    .sb-health.ok .dot { animation: sbPulse 1.6s ease-in-out infinite; }
+    @keyframes sbPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 1px #000 inset;
+        transform: translateZ(0);
+      }
+      50% {
+        box-shadow: 0 0 8px 0 rgba(46,204,113,0.55);
+        transform: translateZ(0);
+      }
+    }
+    
+    /* Compact text */
+    #sb-health-label, #sb-project-label, #sb-transport-label, #sb-audio-label, #sb-cpu-label {
+      white-space: nowrap;
+      font-weight: 700;
+      letter-spacing: .1px;
+      font-size: 11px;
+    }
+
+    /* Respect small windows */
+    @media (max-width: 720px) {
+      .sb-right #sb-audio, .sb-right #sb-cpu { display: none; }
+    }
   </style>
 </head>
 <body>
   <h1>🎧  AudioMIX's First Breath</h1>
-  <div class="status" role="status" aria-live="polite">
-    <span class="dot" aria-hidden="true"></span>
-    <span class="label">backend: <strong id="status-label">checking...</strong></span>
-  </div>
+  <footer class="statusbar" role="contentinfo" aria-label="Application status bar">
+    <div class="sb-left">
+      <!-- backend health -->
+      <button class="sb-item sb-health" id="sb-health" aria-live="polite" title="Backend health">
+        <span class="dot" aria-hidden="true"></span>
+        <span id="sb-health-label">checking...</span>
+      </button>
+
+      <!-- project -->
+      <div class="sb-item" id="sb-project" title="Active project">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 4h7l2 2h7v14H4z"/>
+        </svg>
+        <span id="sb-project-label">No Project</span>
+      </div>
+
+      <!-- transport state -->
+      <div class="sb-item" id="sb-transport" title="Transport">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        <span id="sb-transport-label">Idle</span>
+      </div>
+    </div>
+
+    <div class="sb-right">
+      <!-- audio engine telemetry -->
+      <div class="sb-item" id="sb-audio" title="Sample Rate • Buffer • Latency">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 18h2V6H3v12zm4 0h2V10H7v8zm4 0h2V4h-2v14zm4 0h2V8h-2v10zm4 0h2V12h-2v6z"/>
+        </svg>
+        <span id="sb-audio-label">- kHz • - • - ms</span>
+      </div>       
+
+      <!-- CPU/DSP -->
+      <div class="sb-item" id="sb-cpu" title="CPU / DSP">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 3v2H7v2H5v2H3v6h2v2h2v2h2v2h6v-2h2v-2h2v-2h2V9h-2V7h-2V5h-2V3H9zm8 8v2H7v-2h10z"/>
+        </svg>
+        <span id="sb-cpu-label">CPU -%</span>
+      </div>
+    </div>
+  </footer>
   <script src="renderer.js" defer></script>
 </body>
 </html>
