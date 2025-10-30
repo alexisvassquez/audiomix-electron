@@ -18,7 +18,7 @@ It’s designed with security, modularity, and extensibility in mind.
 ├── src/
 │ ├── main.js     # Electron main process: creates BrowserWindow, manages lifecycle
 │ ├── renderer.html     # Renderer: minimal dark-mode UI shell (for now)
-│ └── preload.js     # (coming soon) (WIP) Secure IPC bridge: exposes limited API surface
+│ └── preload.cjs     # (WIP) Secure IPC bridge: exposes limited API surface
 ├── package.json    # Project manifest
 └── README.md
 ```
