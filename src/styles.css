@@ -1,0 +1,117 @@
+/* Global variables */
+:root {
+  color-scheme: dark;
+  --sb-bg: #1b1b1b;
+  --sb-fg: #d8d8d8;
+  --sb-border: #2a2a2a;
+  --sb-accent: #2ecc71;    /* online green */
+  --sb-danger: #e74c3c;    /* error red    */
+  --sb-muted: #5c5c5c;     /* neutral      */
+  --sb-gap: 10px;
+  --sb-height: 28px;
+  --sb-pad-x: 10px;
+  --sb-font: 11px system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, sans-serif;
+}
+
+/* Base reset */
+html, body {
+  height: 100%;
+  width: 100%;
+}
+body {
+  margin: 0;
+  background: #111;
+  color: #eee;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial, sans-serif;
+  display: grid;
+  place-items: center;
+}
+
+/* Statusbar */
+.statusbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--sb-height);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--sb-bg); color: var(--sb-fg);
+  border-top: 1px solid var(--sb-border);
+  padding: 0 var(--sb-gap);
+  font: var(--sb-font);
+  user-select: none;
+  z-index: 9999;
+}
+
+.sb-left, .sb-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sb-gap);
+}
+.sb-item {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 var(--sb-pad-x);
+  height: calc(var(--sb-height) - 6px);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--sb-fg);
+  opacity: 0.95;
+}
+.sb-item:hover {
+  background: #232323;
+  border-color: #2e2e2e;
+}
+.sb-item .ico {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  opacity: .9;
+}
+
+/* Health indicator button behaves like a pill */
+.sb-health {
+  background: #181818;
+  border-color: var(--sb-border);
+  cursor: pointer;
+}
+.sb-health:focus-visible {
+  outline: 2px solid #3a74ff;
+  outline-offset: 1px;
+}
+
+/* Dot state */
+.sb-health .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sb-muted);
+  box-shadow: 0 0 0 1px #000 inset;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+/* Online/ERR states toggled by JS */
+.sb-health.ok .dot { background: var(--sb-accent); }
+.sb-health.err .dot { background: var(--sb-danger); }
+.sb-health.ok .dot { animation: sbPulse 1.6s ease-in-out infinite; }
+
+@keyframes sbPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1px #000 inset;
+    transform: translateZ(0);
+  }
+  50% {
+    box-shadow: 0 0 8px 0 rgba(46,204,113,0.55);
+    transform: translateZ(0);
+  }
+}
+
+/* Compact text */
+#sb-health-label, #sb-project-label, #sb-transport-label, #sb-audio-label, #sb-cpu-label {
+  white-space: nowrap;
+  font-weight: 700;
+  letter-spacing: .1px;
+  font-size: 11px;
+}
+
+/* Respect small windows */
+@media (max-width: 720px) {
+  .sb-right #sb-audio, .sb-right #sb-cpu { display: none; }
+}
