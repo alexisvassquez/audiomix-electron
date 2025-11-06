@@ -30,10 +30,15 @@ body {
 /* Statusbar */
 .statusbar {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0; 
+  right: 0; 
+  bottom: 0;
   height: var(--sb-height);
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--sb-bg); color: var(--sb-fg);
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
+  background: var(--sb-bg); 
+  color: var(--sb-fg);
   border-top: 1px solid var(--sb-border);
   padding: 0 var(--sb-gap);
   font: var(--sb-font);
@@ -47,7 +52,9 @@ body {
   gap: var(--sb-gap);
 }
 .sb-item {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; 
+  align-items: center; 
+  gap: 6px;
   padding: 0 var(--sb-pad-x);
   height: calc(var(--sb-height) - 6px);
   border: 1px solid transparent;
@@ -88,9 +95,15 @@ body {
 }
 
 /* Online/ERR states toggled by JS */
-.sb-health.ok .dot { background: var(--sb-accent); }
-.sb-health.err .dot { background: var(--sb-danger); }
-.sb-health.ok .dot { animation: sbPulse 1.6s ease-in-out infinite; }
+.sb-health.ok .dot { 
+  background: var(--sb-accent); 
+}
+.sb-health.err .dot { 
+  background: var(--sb-danger); 
+}
+.sb-health.ok .dot { 
+  animation: sbPulse 1.6s ease-in-out infinite; 
+}
 
 @keyframes sbPulse {
   0%, 100% {
@@ -113,5 +126,93 @@ body {
 
 /* Respect small windows */
 @media (max-width: 720px) {
-  .sb-right #sb-audio, .sb-right #sb-cpu { display: none; }
+  .sb-right #sb-audio, .sb-right #sb-cpu { 
+    display: none; 
+  }
+}
+
+/* Command palette */
+#palette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  display: block;
+}
+#palette.show { 
+  pointer-events: auto; 
+}
+
+.pal-topbar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(840px, 96vw);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+
+.pal-input-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--panel-alt);
+  border-bottom: 1px solid var(--border);
+}
+.pal-k {
+  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--muted);
+  background: var(--panel);
+  user-select: none;
+}
+#pal-input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--fg);
+  font-size: 14px;
+  padding: 8px 2px;
+}
+#pal-close {
+  background: transparent;
+  color: var(--muted);
+  border: 0;
+  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#pal-close:hover {
+  background: rgba(255,255,255,.06);
+}
+
+#pal-list {
+  max-height: 46vh;
+  overflow: auto;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+}
+#pal-list li {
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+#pal-list li:hover, #pal-list li.active {
+  background: #1e1e1e;
+}
+#pal-list .hint {
+  color: var(--muted);
+  font-size: 12px;
 }

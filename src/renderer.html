@@ -10,6 +10,17 @@
 </head>
 <body>
   <h1>🎧  AudioMIX's First Breath</h1>
+  <div id="palette" aria-hidden="true">
+    <div class="pal-topbar" role="dialog" aria-modal="true" aria-label="Command Palette">
+      <div class="pal-input-row">
+        <span class="pal-k">Ctrl+K</span>
+        <input id="pal-input" type="text" placeholder="Search commands..." autocomplete="off" />
+        <button id="pal-close" aria-label="Close">X</button>
+      </div>
+      <ul id="pal-list" role="listbox" aria-label="Commands"></ul>
+    </div>
+  </div>
+
   <footer class="statusbar" role="contentinfo" aria-label="Application status bar">
     <div class="sb-left">
       <!-- backend health -->

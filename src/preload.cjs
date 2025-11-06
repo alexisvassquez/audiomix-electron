@@ -1,9 +1,14 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-// Expose minimal, safe API to renderer
 contextBridge.exposeInMainWorld("audiomix", {
   ping: () => ipcRenderer.invoke("ping"),
   window: {
     toggleFullScreen: () => ipcRenderer.invoke("toggle-fullscreen"),
+  },
+  sys: {
+    getStats: () => ipcRenderer.invoke("sys:get-stats")
+  },
+  commands: {
+    run: (id) => ipcRenderer.invoke("cmd:run", id)
   }
 });

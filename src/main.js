@@ -1,6 +1,8 @@
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
+import os from "os";
+import process from "process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +15,32 @@ ipcMain.handle("ping", () => {
 ipcMain.handle("toggle-fullscreen", () => {
   const w = BrowserWindow.getFocusedWindow();
   if (w) w.setFullScreen(!w.isFullScreen());
+});
+
+ipcMain.handle("sys:get-stats", () => {
+  return {
+    loadAvg: os.loadavg()[0],
+    totalMem: os.totalmem(),
+    freeMem: os.freemem()
+  };
+});
+
+ipcMain.handle("cmd:run", async (_evt, id) => {
+  const w = BrowserWindow.getFocusedWindow();
+  switch (id) {
+    case "view:toggleFullscreen":
+      w && w.setFullScreen(!w.isFullScreen());
+      return "Toggled fullscreen";
+    case "file:open":
+      if (!w) return "No window";
+      await dialog.showOpenDialog(w, { properties: ["openFile"] });
+      return "Open dialog shown";
+    case "devtools:toggle":
+      w && w.webContents.toggleDevTools();
+      return "DevTools toogled";
+    default:
+      return `Unknown command: ${id}`;
+  }
 });
 
 function createWindow() {
