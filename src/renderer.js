@@ -182,7 +182,7 @@ async function runCommand(id){
       break;
 
     default:
-      toast(`Unknown command:${id}`);
+      toast(`In development`);
   }
 
   // close palette after running
