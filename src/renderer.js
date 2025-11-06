@@ -27,10 +27,10 @@ async function pingOnce() {
 
 // seed placeholders (wire into real data)
 function seedPlaceholders() {
-  document.getElementById("sb-project-label").textContent = "Untitled Project";
-  document.getElementById("sb-transport-label").textContent = "Idle";
-  document.getElementById("sb-audio-label").textContent = "48 kHz • 256 • 12.0 ms";
-  document.getElementById("sb-cpu-label").textContent = "CPU 4%";
+  const p = document.getElementById("sb-project-label"); if (p) p.textContent = "Untitled Project";
+  const t = document.getElementById("sb-transport-label"); if (t) t.textContent = "Idle";
+  const a = document.getElementById("sb-audio-label"); if (a) a.textContent = "48 kHz • 256 • 12.0 ms";
+  const c = document.getElementById("sb-cpu-label"); if (c) c.textContent = "CPU 4%";
 }
 
 // UI utilities (toast + console log)
@@ -58,28 +58,48 @@ function log(msg){
 
 // Command palette top bar
 const Commands = [
-  { id: "view:toggleFullscreen", label: "Toggle Fullscreen", hint: "Switch full screen mode" },
-  { id: "file:new", label: "New File", hint: "Create a new blank project" },
-  { id: "file:open", label: "Open File...", hint: "Open existing file from your system" },
-  { id: "app:about", label: "About AudioMIX", hint: "Show info dialog" },
-  { id: "console:clear", label: "Clear console", hint: "Clear the log area" },
+  {
+    id: "view:toggleFullscreen",
+    label: "Toggle Fullscreen",
+    hint: "Switch full screen mode"
+  },
+  {
+    id: "file:new",
+    label: "New File",
+    hint: "Create a new blank project"
+  },
+  {
+    id: "file:open",
+    label: "Open File...",
+    hint: "Open existing file from your system"
+  },
+  {
+    id: "app:about",
+    label: "About AudioMIX",
+    hint: "About the AudioMIX project"
+  },
+  {
+    id: "console:clear",
+    label: "Clear console",
+    hint: "Clear the log area"
+  },
 ];
 
-function openPalette() {
-  const root = document.getElementById("palette");
-  const input = document.getElementById("pal-input");
-  const list = document.getElementById("pal-list");
-  if (!root || !input || !list) return;
+const Pal = (() => {
+  let root, input, list;
 
-  root.classList.add("show");
-  root.setAttribute("aria-hidden", "false");
-  input.value = "";
-  render("");
-
-  requestAnimationFrame(() => input.focus());
+  function els() {
+    if (!root) {
+      root = document.getElementById("palette");
+      input = document.getElementById("pal-input");
+      list = document.getElementById("pal-list");
+    }
+    return { root, input, list };
+  }
 
   function render(q) {
-    const qn = q.trim().toLowerCase();
+    const { list } = els();
+    const qn = (q || "").trim().toLowerCase();
     const items = Commands.filter(c => c.label.toLowerCase().includes(qn));
     list.innerHTML = items.map((c,i) => {
       return `
@@ -91,13 +111,74 @@ function openPalette() {
     }).join("");
   }
 
+  function open() {
+    const { root, input } = els();
+    if (!root || !input) return;
+    root.classList.add("show");
+    root.setAttribute("aria-hidden", "false");
+    input.value = "";
+    render("");
+    requestAnimationFrame(() => input.focus());
+  }
+
+  function close() {
+    const { root, input, list } = els();
+    if (!root) return;
+    root.classList.remove("show");
+    root.setAttribute("aria-hidden", "true");
+    if (input) input.value = "";
+    if (list) list.innerHTML = "";
+  }
+
+  // shared listeners
+  function onInput(e){ render(e.target.value); }
+
+  function onKeys(e){
+    if (!root?.classList.contains("show")) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      return close();
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      return pickActive();
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      return move(1);
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      return move(-1);
+    }
+  }
+
+  function onClick(e){
+    if (!root?.classList.contains("show")) return;
+    // close button
+    if (e.target.closest("#pal-close")) {
+      e.preventDefault();
+      e.stopPropagation;
+      return close();
+    }
+    // command item
+    const li = e.target.closest("li[data-id]");
+    if (li) {
+      e.preventDefault();
+      runCommand(li.dataset.id);
+      return;
+    }
+  }
+
   function pickActive() {
+    const { list } = els();
     const el = list.querySelector("li.active");
     if (!el) return;
     runCommand(el.dataset.id);
   }
 
   function move(dir) {
+    const { list } = els();
     const items = [...list.querySelectorAll("li")];
     if (!items.length) return;
     const idx = items.findIndex(li => li.classList.contains("active"));
@@ -109,48 +190,40 @@ function openPalette() {
     items[next].scrollIntoView({ block: "nearest" });
   }
 
-  function close() {
-    root.classList.remove("show");
-    root.setAttribute("aria-hidden", "true");
-    // cleanup listeners
-    input.removeEventListener("input", onInput);
-    root.removeEventListener("keydown", onKeys);
-    root.removeEventListener("click", onClick);
-  }
-
-  function onInput(e){ render(e.target.value); }
-  function onKeys(e){
-    if (e.key === "Escape") {
+  document.addEventListener("DOMContentLoaded", () => {
+    const { root, input } = els();
+    if (!root || !input) return;
+    input.addEventListener("input", onInput);
+    root.addEventListener("keydown", onKeys);
+    root.addEventListener("click", onClick);
+    // global Esc to close, even if focus slipped
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && root.classList.contains("show")) {
+        e.preventDefault();
+        close();
+      }
+    });
+    // wires X button explicitly (redundant but safe)
+    document.getElementById("pal-close")?.addEventListener("click", (e) => {
       e.preventDefault();
       close();
-      return close(); 
-    }
-    if (e.key === "Enter") { 
-      e.preventDefault(); 
-      pickActive(); 
-      return;
-    }
-    if (e.key === "ArrowDown") { 
-      e.preventDefault();
-      move(1); 
-      return;
-    }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      move(-1);
-      return;
-    }
-  }
-  function onClick(e){
-    const li = e.target.closest("li[data-id]");
-    if (li) { runCommand(li.dataset.id); }
-  }
+    });
+  });
 
-  input.addEventListener("input", onInput);
-  root.addEventListener("keydown", onKeys);
-  root.addEventListener("click", onClick);
-}
+  return { open, close };
+})();
 
+// Global hotkey -- Ctrl/Cmd+K opens palette
+window.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  const mod = e.ctrlKey || e.metaKey;    // meta is for future Mac build
+  if (mod && k === "k") {
+    e.preventDefault();
+    Pal.open();
+  }
+});
+
+// Command execution
 async function runCommand(id){
   switch (id) {
     case "view:toggleFullscreen":
@@ -184,30 +257,12 @@ async function runCommand(id){
     default:
       toast(`In development`);
   }
-
-  // close palette after running
-  document.getElementById("palette")?.classList.remove("show");
-  document.getElementById("palette")?.setAttribute("aria-hidden", "true");
+  // close via controller to keep listeners/state consistent
+  Pal.close();
 }
 
-// Close button hook
-document.getElementById("pal-close")?.addEventListener("click", () => {
-  document.getElementById("palette")?.classList.remove("show");
-  document.getElementById("palette")?.setAttribute("aria-hidden", "true");
-});
-
-// Global hotkey -- Ctrl+K opens palette
-window.addEventListener("keydown", (e) => {
-  const k = e.key.toLowerCase();
-  const mod = e.ctrlKey;
-  if (mod && k === "k") {
-    e.preventDefault();
-    openPalette();
-  }
-});
-
 // Statusbar heartbeat
-window.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   seedPlaceholders();
   Status.set("sb-health", { ok: null, text: "checking..." });
   pingOnce();
@@ -215,7 +270,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setInterval(pingOnce, 10_000);
 });
 
-// Extra hotkeys 
+// Extra hotkeys
 // -- Ctrl+Shift+F toggles fullscreen
 window.addEventListener("keydown", (e) => {
   const isCtrlShiftF = e.ctrlKey && e.shiftKey && (e.key === "F" || e.key === "f");
@@ -225,13 +280,3 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-// -- Esc closes out command palette
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    const palette = document.getElementById("palette");
-    if (palette?.classList.remove("show")); {
-      palette.classList.remove("show");
-      palette.setAttribute("aria-hidden", "true");
-    }
-  }
-});
