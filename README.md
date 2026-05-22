@@ -84,6 +84,7 @@ Electron will launch a 1100x720 dark window title **“🎧 AudioMIX’s First B
 ## 🛡️  Security Config
 
 **AudioMIX-Electron** enforces:
+
 - `contextIsolation` and `sandbox` for the renderer
 - a strict `Content-Security-Policy`
 - no `nodeIntegration` in the UI layer
@@ -108,10 +109,8 @@ C++ for DSP, Python for AI, JS for orchestration.
 ## 👩‍💻  Developer Notes
 
 - Built with **Electron v39** + **Node 22** + **Chromium 128**
-- Works beautifully in **Crostini / Debian Linux** (Chrom-E certified ✅)
-- Recommended editor: `nano` or `VS Code` (when available)
-    > note: I personally don't use VS Code, but that's only because of bloat. Feel free to use whichever IDE suits you best.
-- License: MIT – because music should be free to build.
+- Works beautifully in **Crostini / Debian Linux** 
+- License: GNU v3
 
 ---
 
