@@ -1,5 +1,9 @@
+// AudioMIX Electron
+// Electron main entrypoint
+
 import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import path from "path";
+import { join } from "path";
 import { fileURLToPath } from "url";
 import os from "os";
 import process from "process";
@@ -81,7 +85,13 @@ function createWindow() {
   ]);
   Menu.setApplicationMenu(menu);
 
-  win.loadFile(path.join(__dirname, "renderer.html"));
+  // in development, load from Vite dev server
+  // in production, load the built file
+  if (process.env["ELECTRON_RENDERER_URL"]) {
+    win.loadURL(process.env["ELECTRON_RENDERER_URL"])
+  } else {
+    win.loadFile(join(__dirname, "../renderer/index.html"));
+  }
 }
 
 app.whenReady().then(createWindow);
