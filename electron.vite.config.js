@@ -24,10 +24,11 @@ export default defineConfig({
     renderer: {
         // React app
         plugins: [react()],
+        root: ".",
         build: {
             rollupOptions: {
                 input: {
-                    index: "index.html"
+                    index: "./index.html"
                 }
             }
         }
