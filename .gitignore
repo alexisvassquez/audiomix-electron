@@ -1,32 +1,46 @@
-# Node dependencies
+# AudioMIX Electron
+# .gitignore
+
+# Dependencies
 node_modules/
+
+# Vite build output
+dist/
+dist-electron/
+release/
+
+# electron-vite cache
+.vite/
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 
-# Build artifacts
-dist/
-build/
-out/
-*.asar
+# Environment variables
+.env
+.env.local
+.env.production
 
-# OS files
+# OS artifacts
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Environment files
-.env
-.env.*
-
-# Electron cache / binaries
-.cache/
-.electron/
-
-# VS Code / IDE metadata
+# Editor artifacts
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Logs
-*.log
-logs/
+# Electron packager output
+out/
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+.eslintcache
