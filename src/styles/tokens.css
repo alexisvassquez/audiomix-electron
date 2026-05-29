@@ -184,3 +184,20 @@ body {
 .am-btn.primary:hover {
     background: #00ff9f33;
 }
+
+/* StatusBar items */
+.sb-item {
+    padding: 0 8px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-dim);
+    border-right: 1px solid var(--border);
+    cursor: default;
+    white-space: nowrap;
+}
+
+.sb-item:hover {
+    background: var(--surface-alt);
+}
