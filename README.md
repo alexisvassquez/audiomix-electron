@@ -143,6 +143,8 @@ Hardware status indicators are visible in the statusbar across all three modes.
 
 ## Quick Start
 
+Clone and run locally:
+
 ```bash
 git clone git@github.com:alexisvassquez/audiomix-electron.git
 cd audiomix-electron
@@ -150,9 +152,18 @@ npm install
 npm run dev
 ```
 
-Electron will launch with the React renderer served via Vite's dev server with hot module replacement.
+Electron will launch with the React renderer served via Vite's dev
+server with full hot module replacement.
 
-> Node 22+ required. Node 18 is not supported.
+> **Requirements:** Node 22+ is required. Node 18 is not supported.
+
+### Available Scripts
+
+| Command | Description |
+| :------ | :---------- |
+| `npm run dev` | Start development server with HMR |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
 
 ---
 
@@ -221,7 +232,7 @@ If you are a live coder, electronic musician, lighting designer, or hardware hac
 
 ## Author
 
-**Alexis M. Vasquez**
+**© Alexis M. Vasquez**
 Software Engineer — [AMV Digital Studios](https://alexismvasquez.com)
 
 > "Create change through code."
