@@ -207,7 +207,9 @@ A Figma design file is in progress, structured as follows:
 - **Page 4 — Live Mode** — AudioScript editor and console
 - **Page 5 — Perform Mode** — hardware control surface
 - **Page 6 — Interactions** — drag and drop, view toggle, clash detection flows
-- **Page 7 — Mobile / Responsive** — future HAL companion app
+- **Page 7 — HAL Control Surface** — full hardware abstraction layer UI for
+  live performance integration including LED arrays, DMX lighting rigs,
+  MIDI controllers, OSC routing, speakers, and connected stage machinery
 
 ---
 
