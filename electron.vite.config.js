@@ -2,6 +2,7 @@
 // Vite config entry point
 
 import { defineConfig } from "electron-vite";
+import { resolve } from "path";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
@@ -9,7 +10,7 @@ export default defineConfig({
         // Electron main process
         build: {
             lib: {
-                entry: "electron/main.js"
+                entry: resolve(__dirname, "electron/main.js")
             }
         }
     },
@@ -17,18 +18,18 @@ export default defineConfig({
         // Preload bridge
         build: {
             lib: {
-                entry: "electron/preload.cjs"
+                entry: resolve(__dirname, "electron/preload.cjs")
             }
         }
     },
     renderer: {
         // React app
-        plugins: [react()],
         root: ".",
+        plugins: [react()],
         build: {
             rollupOptions: {
                 input: {
-                    index: "./index.html"
+                    index: resolve(__dirname, "index.html")
                 }
             }
         }

@@ -7,7 +7,6 @@
 // Juniper2.0 (AI) status
 
 import React from "react";
-import { defaultClientConditions } from "vite";
 
 const MODES = ["STUDIO", "LIVE", "PERFORM"];
 

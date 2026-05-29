@@ -79,7 +79,7 @@ body {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
 }
 
 /* Scrollbars */

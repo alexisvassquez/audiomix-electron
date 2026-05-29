@@ -196,6 +196,6 @@ export const JUNIPER_INITIAL_MSGS = [
 // Helpers
 export function fmtTime(seconds) {
     const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const s = (second % 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}:00`;
 }
