@@ -224,5 +224,6 @@ should serve both the bedroom producer and the Deadmau5.
 ---
 
 *AudioMIX Design System*
+
 *© Alexis M. Vasquez / AMV Digital Studios 2026*
 *GNU General Public License v3.0*
