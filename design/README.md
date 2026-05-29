@@ -1,7 +1,7 @@
 # 🎧 AudioMIX Design System
 
 This directory contains the living design artifacts for **AudioMIX Electron** —
-the desktop UI shell for the AudioMIX Creative Operating Layer.
+the desktop UI shell for the [AudioMIX Creative Operating Layer](https://github.com/alexisvassquez/ai_spotibot_player).
 
 These are not static mockups. The wireframes in this directory are fully
 interactive React components that can be run and explored directly.
