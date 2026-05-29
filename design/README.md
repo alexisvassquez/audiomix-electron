@@ -221,7 +221,7 @@ visual direction — the design tokens and wireframes in this directory
 are your starting point.
 
 The one rule: **low floor, high ceiling.** Every design decision
-should serve both the bedroom producer and the Deadmau5.
+should serve both the bedroom producer and the headliner.
 
 ---
 
