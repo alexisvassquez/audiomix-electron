@@ -1,5 +1,5 @@
 
-# AudioMIX Electron UI
+# 🎧 AudioMIX Electron UI
 
 ## 📦 CHANGELOG
 
