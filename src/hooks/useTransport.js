@@ -1,6 +1,6 @@
 // AudioMIX Electron
 // src/hooks/useTransport.js
-
+//
 // Transport state:
 // play, stop, record, time, playhead, BPM, snap
 // Currently local state. Will be driven by AudioMIX core engine
@@ -26,7 +26,7 @@ export function useTransport() {
             setTime(t => t + 1);
             setPlayhead(p => {
                 const next = p + 0.0625;
-                return next => BARS ? 0 : next;
+                return next >= BARS ? 0 : next;
             });
         }, 250);
 

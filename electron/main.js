@@ -49,8 +49,8 @@ ipcMain.handle("cmd:run", async (_evt, id) => {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1100,
-    height: 720,
+    width: 1600,
+    height: 900,
     minWidth: 960,    // lets users resize but keeps sane minimums
     minHeight: 540,
     useContentSize: true,    // size refers to web content (not incl frame)
@@ -68,6 +68,7 @@ function createWindow() {
 
   // start maximized ("full canvas")
   win.maximize();
+  console.log("Window bounds after maximize:", win.getBounds());
 
   // view menu with a native "Toggle Full Screen"
   const menu = Menu.buildFromTemplate([

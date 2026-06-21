@@ -10,6 +10,7 @@ import StatusBar from "./components/StatusBar.jsx";
 import Transport from "./components/Transport.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import { useTransport } from "./hooks/useTransport.js";
+import Arrangement from "./components/Studio/Arrangement.jsx";
 
 const PROJECT = "OOEPUI_NIGHT_01";
 
@@ -17,6 +18,13 @@ export default function App() {
     const [mode, setMode] = useState("STUDIO");
 
     const transport = useTransport();
+
+    // Debug
+    React.useEffect(() => {
+        console.log("window.innerWidth:", window.innerWidth);
+        console.log("window.innerHeight:", window.innerHeight);
+        console.log("devicePixelRatio:", window.devicePixelRatio);
+    }, []);
 
     return (
         <div style={{
@@ -32,9 +40,9 @@ export default function App() {
 
             {/* Top bar - always visible */}
             <TopBar
-              mode={mode}
-              onModeChange={setMode}
-              project={PROJECT}
+                mode={mode}
+                onModeChange={setMode}
+                project={PROJECT}
             />
 
             {/* Main body */}
@@ -42,55 +50,37 @@ export default function App() {
                 flex: 1,
                 display: "flex",
                 overflow: "hidden",
-                minHeight: 0
+                minHeight: 0,
+                minWidth: 0,
             }}>
                 {/* Sidebar - always visible */}
                 <Sidebar />
 
-            {/* Center canvas - mode dependent, placeholder */}
-            <div style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--text-muted)",
-                fontSize: 12,
-                letterSpacing: ".1em",
-                flexDirection: "column",
-                gap: 8,            
-            }}>
-                <div style={{ 
-                    color: "var(--accent)", 
-                    fontSize: 10,
-                    letterSpacing: ".2em",
-                }}>
-                    {mode} MODE
-                </div>
-                <div>Canvas coming soon</div>
+                {/* Center canvas, fed from Arrangement.jsx */}
+                <Arrangement playhead={transport.playhead} />
             </div>
-        </div>
 
-        {/* Transport - always visible */}
-        <Transport
-          playing={transport.playing}
-          recording={transport.recording}
-          time={transport.time}
-          bpm={transport.bpm}
-          snap={transport.snap}
-          snapOptions={transport.snapOptions}
-          onTogglePlay={transport.togglePlay}
-          onStop={transport.stop}
-          onToggleRecord={transport.toggleRecord}
-          onSnapChange={transport.setSnap}
-          onBpmChange={transport.setBpm}
-        />
+            {/* Transport - always visible */}
+            <Transport
+                playing={transport.playing}
+                recording={transport.recording}
+                time={transport.time}
+                bpm={transport.bpm}
+                snap={transport.snap}
+                snapOptions={transport.snapOptions}
+                onTogglePlay={transport.togglePlay}
+                onStop={transport.stop}
+                onToggleRecord={transport.toggleRecord}
+                onSnapChange={transport.setSnap}
+                onBpmChange={transport.setBpm}
+            />
 
-        {/* Status bar - always visible */}
-        <StatusBar
-          mode={mode}
-          project={PROJECT}
-          engineOnline={transport.playing}
-        />
+            {/* Status bar - always visible */}
+            <StatusBar
+                mode={mode}
+                project={PROJECT}
+                engineOnline={transport.playing}
+            />
 
         </div>
     );
