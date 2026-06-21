@@ -13,7 +13,7 @@ export function useTransport() {
     const [playing, setPlaying] = useState(false);
     const [recording, setRecording] = useState(false);
     const [time, setTime] = useState(0);
-    const [playhead,setPlayhead] = useState(0);
+    const [playhead, setPlayhead] = useState(0);
     const [bpm, setBpm] = useState(138);
     const [snap, setSnap] = useState("1/4");
 
@@ -22,16 +22,23 @@ export function useTransport() {
     useEffect(() => {
         if (!playing) return;
 
+        const TICK_MS = 50;  // smaller tick = smoother playhead motion
+
         intervalRef.current = setInterval(() => {
-            setTime(t => t + 1);
+            setTime(t => t + TICK_MS / 1000);
+
             setPlayhead(p => {
-                const next = p + 0.0625;
+                const secondsPerBeat = 60 / bpm;
+                const secondsPerBar = secondsPerBeat * 4;  // assumes 4/4
+                const barsPerTick = (TICK_MS / 1000) / secondsPerBar;
+
+                const next = p + barsPerTick;
                 return next >= BARS ? 0 : next;
             });
-        }, 250);
+        }, TICK_MS);
 
         return () => clearInterval(intervalRef.current);
-    }, [playing]);
+    }, [playing, bpm]);
 
     function play() {
         setPlaying(true);

@@ -1,6 +1,6 @@
 // AudioMIX Electron
 // src/data/studioData.js
-
+//
 // Static placeholder data for STUDIO mode
 // These will eventually be driven by the AudioMIX
 // core engine via FastAPI/WebSocket
@@ -195,7 +195,8 @@ export const JUNIPER_INITIAL_MSGS = [
 
 // Helpers
 export function fmtTime(seconds) {
+    const total = Math.floor(seconds);
     const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
+    const s = (total % 60).toString().padStart(2, "0");
     return `${m}:${s}:00`;
 }

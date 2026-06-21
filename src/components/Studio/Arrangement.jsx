@@ -76,7 +76,7 @@ export default function Arrangement({ playhead }) {
                 }}>
                     {TRACKS.map(tr => (
                         <div key={tr.id} style={{
-                            height: 36,
+                            height: 44,
                             borderBottom: "1px solid var(--border)",
                             display: "flex",
                             alignItems: "center",
@@ -200,7 +200,7 @@ export default function Arrangement({ playhead }) {
 
                         {TRACKS.map((tr, ti) => (
                             <div key={tr.id} style={{
-                                height: 36,
+                                height: 44,
                                 borderBottom: "1px solid var(--border)",
                                 position: "relative",
                                 minWidth: "100%",
@@ -214,7 +214,7 @@ export default function Arrangement({ playhead }) {
                                         top: 4,
                                         left: clip.start * BEAT_W,
                                         width: clip.len * BEAT_W - 2,
-                                        height: 28,
+                                        height: 34,
                                         borderRadius: 3,
                                         background: `${tr.color}20`,
                                         border: `1px solid ${tr.color}55`,
