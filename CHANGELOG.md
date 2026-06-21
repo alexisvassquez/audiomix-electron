@@ -9,6 +9,57 @@ The AudioMIX core engine has its own separate changelog in the [AudioMIX Core re
 
 ---
 
+## [0.3.1] — 2026-06-20
+
+### Added
+
+- **`Arrangement.jsx`** — first real Studio mode component. Track headers,
+  bar ruler, clip lanes, and live playhead, built from the static `TRACKS`
+  data in `studioData.js`. Replaces the STUDIO mode placeholder canvas.
+- **Tempo-accurate transport.** `useTransport`'s playhead and elapsed time
+  now derive from actual BPM (`60 / bpm` seconds per beat) rather than a
+  fixed arbitrary step — playback speed is now correct and responds to
+  BPM changes, including for the full 16-bar loop duration.
+- **Responsive timeline width.** Arrangement's ruler and clip lanes now
+  measure available container width via `ResizeObserver` and fill it
+  (`Math.max(BARS * BEAT_W, containerWidth)`), instead of stopping at a
+  fixed pixel width and leaving dead space on larger windows.
+
+### Changed
+
+- Bumped default `BrowserWindow` size in `electron/main.js` from
+  `1100x720` to `1600x900` — `win.maximize()` was not reliably honored
+  by the WSL2/WSLg window manager, so a larger default compensates.
+- Increased Arrangement track/lane row height from `36px` to `44px`
+  (clips `28px` → `34px`) for better visual breathing room.
+- `fmtTime()` now floors its input before formatting to guard against
+  floating-point drift from accumulated `setInterval` ticks (e.g.
+  `8.299999999999983` → `00:08:00`).
+
+### Fixed
+
+- Fixed `NaN` left-position CSS warning in `Arrangement.jsx` — traced
+  to a `next => BARS ? 0 : next` arrow function shadowing the `next`
+  variable inside `useTransport`'s `setPlayhead` updater, returning a
+  function instead of a number.
+- Fixed Arrangement timeline rendering at a fixed sub-window width
+  inside a correctly-maximized Electron window — root cause was no
+  mechanism stretching the canvas past `BARS * BEAT_W` content width.
+
+### Notes
+
+- `win.maximize()` not reliably firing on WSL2/WSLg is a known
+  environment quirk, not addressed at the root — current workaround is
+  a larger default window size. Worth revisiting if it affects other
+  Linux environments.
+- The empty-canvas-past-bar-16 behavior at wide window sizes is
+  intentional (matches traditional DAW convention — fixed
+  zoom level, not auto-stretching content). A future zoom control will
+  let producers adjust `BEAT_W` to fill available space at their
+  preferred bar density.
+
+---
+
 ## [0.3.0] — 2026-05-29
 
 ### Changed
