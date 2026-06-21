@@ -15,6 +15,20 @@ import { TRACKS, BARS, BEAT_W } from "../../data/studioData.js";
 
 export default function Arrangement({ playhead }) {
     const playheadX = playhead * BEAT_W;
+    const containerRef = React.useRef(null);
+    const [containerWidth, setContainerWidth] = React.useState(0);
+
+    React.useEffect(() => {
+        if (!containerRef.current) return;
+        const el = containerRef.current;
+        const observer = new ResizeObserver(entries => {
+            setContainerWidth(entries[0].contentRect.width);
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    const timelineWidth = Math.max(BARS * BEAT_W, containerWidth);
 
     return (
         <div style={{
@@ -123,6 +137,7 @@ export default function Arrangement({ playhead }) {
                     overflowY: "hidden",
                     display: "flex",
                     flexDirection: "column",
+                    minWidth: 0,
                 }}>
 
                     {/* Ruler */}
@@ -133,7 +148,8 @@ export default function Arrangement({ playhead }) {
                         background: "var(--surface-alt)",
                         borderBottom: "1px solid var(--border)",
                         position: "relative",
-                        width: BARS * BEAT_W,
+                        minWidth: "100%",
+                        width: "timelineWidth",
                     }}>
                         {Array.from({ length: BARS }, (_, i) => (
                             <div key={i} style={{
@@ -162,7 +178,12 @@ export default function Arrangement({ playhead }) {
                     </div>
 
                     {/* Clip lanes */}
-                    <div style={{ position: "relative", width: BARS * BEAT_W }}>
+                    <div style={{
+                        position: "relative",
+                        flex: 1,
+                        mindWidth: "100%",
+                        width: "timelineWidth",
+                    }}>
                         {/* Playhead line across all lanes */}
                         <div style={{
                             position: "absolute",
@@ -176,14 +197,16 @@ export default function Arrangement({ playhead }) {
                             zIndex: 20,
                             transition: "left .05s linear",
                         }} />
-                        
+
                         {TRACKS.map((tr, ti) => (
                             <div key={tr.id} style={{
                                 height: 36,
                                 borderBottom: "1px solid var(--border)",
                                 position: "relative",
+                                minWidth: "100%",
+                                width: "timelineWidth",
                                 background: ti % 2 === 0 ? "var(--surface)" : "#0b0b0b",
-                                backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent ${BEAT_W - 1}px, var(--border) ${BEAT_W -1}px, var(--border) ${BEAT_W}px)`,
+                                backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent ${BEAT_W - 1}px, var(--border) ${BEAT_W - 1}px, var(--border) ${BEAT_W}px)`,
                             }}>
                                 {tr.clips.map((clip, ci) => (
                                     <div key={ci} style={{
