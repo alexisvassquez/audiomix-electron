@@ -146,7 +146,7 @@ Hardware status indicators are visible in the statusbar across all three modes.
 Clone and run locally:
 
 ```bash
-git clone git@github.com:alexisvassquez/audiomix-electron.git
+git clone https://github.com/alexisvassquez/audiomix-electron.git
 cd audiomix-electron
 npm install
 npm run dev
