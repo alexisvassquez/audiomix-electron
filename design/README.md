@@ -1,7 +1,7 @@
 # 🎧 AudioMIX Design System
 
 This directory contains the living design artifacts for **AudioMIX Electron** —
-the desktop UI shell for the [AudioMIX Creative Operating Layer](https://github.com/alexisvassquez/ai_spotibot_player).
+the desktop UI shell for the [AudioMIX Creative Operating Layer](https://github.com/alexisvassquez/audiomix).
 
 These are not static mockups. The wireframes in this directory are fully
 interactive React components that can be run and explored directly.
@@ -225,7 +225,7 @@ should serve both the bedroom producer and the headliner.
 
 ---
 
-*AudioMIX Design System*
+> *AudioMIX Design System*
 
 *© Alexis M. Vasquez / AMV Digital Studios 2026*
 *GNU General Public License v3.0*
