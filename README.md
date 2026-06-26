@@ -8,7 +8,7 @@
 
 ## Overview
 
-**AudioMIX Electron** is the desktop UI shell for the [AudioMIX Core Engine](https://github.com/alexisvassquez/ai_spotibot_player) — a modular, AI-assisted digital audio workstation and live performance platform built for independent producers, live coders, and electronic musicians.
+**AudioMIX Electron** is the desktop UI shell for the [AudioMIX Core Engine](https://github.com/alexisvassquez/audiomix) — a modular, AI-assisted digital audio workstation and live performance platform built for independent producers, live coders, and electronic musicians.
 
 AudioMIX is not a traditional DAW. It is a **Creative Operating Layer** — a unified environment where music production, live coding, AI collaboration, and hardware control coexist in a single coherent interface. The Electron shell is the visual surface of that layer.
 
@@ -211,7 +211,7 @@ AudioMIX treats music creation as computation — blending art and logic into a 
 
 | Repository | Purpose |
 | :--------- | :------ |
-| [`AudioMIX Core`](https://github.com/alexisvassquez/ai_spotibot_player) | DSP engine, AI layer, AudioScript compiler, live performance engine |
+| [`AudioMIX Core`](https://github.com/alexisvassquez/audiomix) | DSP engine, AI layer, AudioScript compiler, live performance engine |
 | [`AudioMIX Electron`](https://github.com/alexisvassquez/audiomix-electron) | This repository — desktop UI shell |
 
 ---

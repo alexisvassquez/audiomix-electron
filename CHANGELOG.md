@@ -5,7 +5,7 @@
 
 All notable changes to the AudioMIX Electron UI will be documented in this file.
 
-The AudioMIX core engine has its own separate changelog in the [AudioMIX Core repository](https://github.com/alexisvassquez/ai_spotibot_player)
+The AudioMIX core engine has its own separate changelog in the [AudioMIX Core repository](https://github.com/alexisvassquez/audiomix)
 
 ---
 
