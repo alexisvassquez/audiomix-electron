@@ -1,7 +1,7 @@
 // AudioMIX Electron
 // Electron main entrypoint
 
-import "dontenv/config";
+import "dotenv/config";
 import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import path from "path";
 import { join } from "path";
