@@ -90,7 +90,7 @@ export function useShellConnection() {
     // Subscribe to connection status changes pushed by shellBridge.js
     // Fires on both initial connect and any subsequent disconnect/
     // reconnect cycle.
-    const ubsubStatus = window.audiomix.shell.onStatus(({ connected }) => {
+    const unsubStatus = window.audiomix.shell.onStatus(({ connected }) => {
         setConnected(connected);
     });
 

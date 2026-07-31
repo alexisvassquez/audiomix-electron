@@ -11,6 +11,7 @@ import Transport from "./components/Transport.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import { useTransport } from "./hooks/useTransport.js";
 import Arrangement from "./components/Studio/Arrangement.jsx";
+import ShellDock from "./components/ShellDock.jsx";
 
 const PROJECT = "OOEPUI_NIGHT_01";
 
@@ -56,8 +57,23 @@ export default function App() {
                 {/* Sidebar - always visible */}
                 <Sidebar />
 
-                {/* Center canvas, fed from Arrangement.jsx */}
-                <Arrangement playhead={transport.playhead} />
+                {/* Canvas column: Arrangement + Shell dock stacked,
+                    so the dock spans only the canvas width, not sidebar too */}
+                <div style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: 0,
+                    minWidth: 0,
+                }}>
+
+                    {/* Center canvas, fed from Arrangement.jsx */}
+                    <Arrangement playhead={transport.playhead} />
+
+                    {/* AS Shell dock - collapsible, sits btwn Arrangement
+                        and Transport */}
+                    <ShellDock />
+                </div>
             </div>
 
             {/* Transport - always visible */}

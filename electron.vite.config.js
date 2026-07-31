@@ -18,7 +18,9 @@ export default defineConfig({
         // Preload bridge
         build: {
             lib: {
-                entry: resolve(__dirname, "electron/preload.cjs")
+                entry: resolve(__dirname, "electron/preload.cjs"),
+                formats: ["cjs"],
+                fileName: () => "preload.cjs"
             }
         }
     },

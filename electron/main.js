@@ -64,7 +64,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       sandbox: true,
-      preload: path.join(__dirname, "preload.cjs"),
+      preload: path.join(__dirname, "../preload/preload.cjs"),
     },
   });
 
