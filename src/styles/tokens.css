@@ -64,6 +64,8 @@
     --transport-h: 42px;
     --sidebar-w: 180px;
     --right-panel-w: 200px;
+    --dock-h: 260px;
+    --dock-collapsed-h: 30px;
 }
 
 /* Base */
