@@ -9,6 +9,44 @@ The AudioMIX core engine has its own separate changelog in the [AudioMIX Core re
 
 ---
 
+## [0.4.0] — 2026-07-31
+
+### Added
+
+- `src/components/ShellDock.jsx` — the AS Shell panel, live for the first time. A collapsible dock anchored below the Arrangement and above the Transport row, matching the STUDIO mode mockup. Click the `SHELL` tab to expand/collapse.
+  - Wired to `useShellConnection()` exclusively — no direct WebSocket or Node access from the renderer, consistent with the existing `contextIsolation`/`sandbox` model.
+  - Owns its own local command log (array of `{ kind, time, text }` entries), since the hook only exposes the *latest* `lastOutput`/`session`, not history.
+  - Appends a `cmd` entry on submit, and a `result`/`error` entry whenever lastOutput/lastError changes, via `useEffect`.
+  - IR/LIVE branch pill reflects `session.audioscript_branch` live — confirmed updating in real time off a `session_update` push, with zero manual refresh, the first time the toggle flipped to LIVE mid-session during testing.
+  - Connection status pill (`connected`/`disconnected`), reusing the existing am-pulse keyframe for the live-connection dot.
+  - **Not yet wired:** clicking the branch toggle does not call `/shell/live/enter` or `/shell/live/exit` — it's currently a read-only reflection of session state, by design, deferred to a follow-up pass.
+- `src/styles/tokens.css` — added `--dock-h` (260px) and `--dock-collapsed-h` (30px) to the existing Sizing block, alongside `--topbar-h`/`--statusbar-h`/`--transport-h`.
+  - Added the full `.shell-dock` rule set, reusing `.am-panel-header`, `.am-panel-title`, and `.am-btn.primary` rather than introducing a parallel set of one-off styles — the dock now reads as native to the rest of the app instead of a bolted-on piece.
+- `electron/preload.cjs` — restored the `shell` key on the `contextBridge exposeInMainWorld("audiomix", ...)` call (`sendCommand`, `isConnected`, `onMessage`, `onStatus`). This had been designed and discussed previously but never actually landed in the file on disk — `window.audiomix.shell` was undefined at runtime until this fix.
+
+### Changed
+
+- `src/App.jsx` — `Arrangement` is now wrapped in its own flex column alongside the new `ShellDock`, as a sibling to `Sidebar`, rather than `Arrangement` sitting directly in the main row. This keeps the dock spanning only the canvas width (matching the mockup) instead of stretching under the sidebar too. `minHeight: 0` on the new wrapper was required — without it the column refuses to shrink below content height once the dock takes up space below `Arrangement`.
+
+### Fixed
+
+- Preload script failing to load entirely — `Unable to load preload script: .../out/main/preload.cjs, ENOENT`. Two separate, stacked bugs:
+  - `electron.vite.config.js`'s preload build had no explicit output format, so Vite defaulted to ESM (matching `package.json`'s `"type": "module"`) regardless of the `.cjs` source filename — producing `out/preload/preload.mjs` instead.
+  - Sandboxed preload scripts (`sandbox: true` in `main.js`'s `webPreferences`) require CommonJS. Fixed with `formats: ["cjs"]` plus `fileName: () => "preload.cjs"` inside `lib` — note `rollupOptions.output.entryFileNames` does not work here; Vite's library mode overrides it internally. `fileName` inside `lib` is the correct lever.
+  - `main.js` pointed at `path.join(__dirname, "preload.cjs")` — looking for the preload script in the same folder as itself (`out/main/`). Preload output actually lands in the sibling folder `out/preload/`. Fixed to `path.join(__dirname, "../preload/preload.cjs")`.
+  - This preload failure was the root cause of a cascading `Cannot read properties of undefined (reading 'shell')` crash in `useShellConnection.js` — `window.audiomix` was simply never created, not a bug in the hook itself.
+- `useShellConnection.js` — `ReferenceError: unsubStatus is not defined`. A transcription typo (`ubsubStatus`, transposed letters) meant the variable declared at the `onStatus()` subscription didn't match the name referenced two lines later in `unsubsRef.current = [...]`. One-character fix.
+- Runtime readiness race condition (core repo, `api/bridge.py`, surfaced during Electron end-to-end testing) — `_wait_for_runtime_ready()`'s default 10s timeout was too short for full (non-safe) mode's real boot time, causing `enter_live_mode()` to report ready while `load_modules()` was still in progress. First command sent from the live UI timed out silently as a result. Raised to 60s at the `start()` call site.
+  - Documented as a known tradeoff, not a permanent fix — the durable version is a `"__RUNTIME_READY__"` sentinel the runtime prints on genuine completion, with `_wait_for_runtime_ready()` waiting on that signal instead of racing a clock. Left as a follow-up, not urgent.
+
+### Notes
+
+- **🎉 Confirmed working end-to-end for the first time tonight:** typed command in the real `ShellDock` UI → `sendCommand()` → IPC → `shellBridge.js` → WebSocket → FastAPI `/shell/ws` → `bridge.send_command()` → `audioscript_runtime.py` subprocess → response → `shell_output` WSMessage → back through the same chain → rendered in the log. Also confirmed bidirectional: a `session_update` pushed from an out-of-band `curl` call updated the branch pill in the live UI with no page reload.
+- Emoji glyphs from the runtime's `say()` output (e.g. 🎚️, 💡) don't currently render in the log — cosmetic only, not investigated tonight. Likely a font/encoding gap between the runtime's stdout and the log's rendering, not a data-loss issue.
+- Branch toggle wiring (`/shell/live/enter` / `/shell/live/exit` from a real click, rather than only reflecting state) is the natural next step now that the read path is fully confirmed.
+
+---
+
 ## [0.3.1] — 2026-06-20
 
 ### Added
