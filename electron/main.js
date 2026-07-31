@@ -2,6 +2,7 @@
 // Electron main entrypoint
 
 import "dotenv/config";
+import { createShellBridge } from "./shellBridge.js";
 import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import path from "path";
 import { join } from "path";
@@ -94,6 +95,9 @@ function createWindow() {
   } else {
     win.loadFile(join(__dirname, "../renderer/index.html"));
   }
+
+  const shellBridge = createShellBridge(win);
+  win.on("closed", () => shellBridge.destroy());
 }
 
 app.whenReady().then(createWindow);

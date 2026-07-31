@@ -11,7 +11,7 @@
 import WebSocket from "ws";
 import { ipcMain } from "electron";
 
-const SHELL_WS_URL = `ws://127.0.0.1:${process.env.AUDIOMIX_API_PORT || 8000}/shell/ws`;
+const SHELL_WS_URL = `ws://127.0.0.1:${process.env.AUDIOMIX_API_PORT || 8765}/shell/ws`;
 const API_TOKEN = process.env.AUDIOMIX_API_TOKEN;
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 15000;
@@ -33,17 +33,18 @@ class ShellBridge {
         this.manuallyClosed = false;
 
         this._registerIpcHandlers();
-        this.reconnectAttempt();
+        this.connect();
     }
 
     connect() {
         if (this.ws) this.ws.removeAllListeners();
 
         this.ws = new WebSocket(SHELL_WS_URL, {
-            headers: { "x-audio-mix-token": API_TOKEN },
+            headers: { "x-audiomix-token": API_TOKEN },
         });
 
         this.ws.on("open", () => {
+            console.log("[shellBridge] connected to FastAPI backend");
             this.reconnectAttempt = 0;
             this._emit("shell:status", { connected: true });
         });
@@ -62,6 +63,7 @@ class ShellBridge {
         });
 
         this.ws.on("close", (code) => {
+            console.log(`[shellBridge] connection closed (code ${code})`);
             this._emit("shell:status", { connected: false });
             if (code === 4401) {
                 // close code for "unauthorized", don't retry with same bad token
@@ -72,9 +74,10 @@ class ShellBridge {
             if (!this.manuallyClosed) this._scheduleReconnect();
         });
 
-        this.ws.on("error", () => {
+        this.ws.on("error", (err) => {
             // 'close' fires after 'error' for most failure modes
             // handles reconnect
+            console.log(`[shellBridge] connection error: ${err.message}`);
         });
     }
 
