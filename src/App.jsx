@@ -20,6 +20,7 @@ export default function App() {
     const [mode, setMode] = useState("STUDIO");
 
     const transport = useTransport();
+    const { tracks, addClip } = useArrangement();
 
     // Debug
     React.useEffect(() => {
@@ -69,7 +70,11 @@ export default function App() {
                 }}>
 
                     {/* Center canvas, fed from Arrangement.jsx */}
-                    <Arrangement playhead={transport.playhead} />
+                    <Arrangement 
+                        playhead={transport.playhead} 
+                        tracks={tracks}
+                        onAddClip={addClip} 
+                    />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement
                         and Transport */}
