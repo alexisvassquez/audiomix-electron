@@ -259,7 +259,7 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                             autofocus
                                             onClick={(e) => e.stopPropagation()}
                                             onChange={(e) => {
-                                                onAssignSample(tr.id, clip.id, "drums", e.target.value);
+                                                onAssignSample(tr.id, openClip.id, "drums", e.target.value);
                                                 setOpenPicker(null);
                                             }}
                                             defaultValue=""
