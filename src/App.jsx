@@ -12,6 +12,7 @@ import Sidebar from "./components/Sidebar.jsx";
 import { useTransport } from "./hooks/useTransport.js";
 import Arrangement from "./components/Studio/Arrangement.jsx";
 import ShellDock from "./components/ShellDock.jsx";
+import { useArrangement } from "./hooks/useArrangement.js";
 
 const PROJECT = "OOEPUI_NIGHT_01";
 
