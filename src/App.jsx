@@ -20,7 +20,7 @@ export default function App() {
     const [mode, setMode] = useState("STUDIO");
 
     const transport = useTransport();
-    const { tracks, addClip } = useArrangement();
+    const { tracks, addClip, assignSample } = useArrangement();
 
     // Debug
     React.useEffect(() => {
@@ -73,7 +73,8 @@ export default function App() {
                     <Arrangement 
                         playhead={transport.playhead} 
                         tracks={tracks}
-                        onAddClip={addClip} 
+                        onAddClip={addClip}
+                        onAssignSample={assignSample} 
                     />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement

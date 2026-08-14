@@ -16,6 +16,8 @@ function withClipIds(tracks) {
         ...tr,
         clips: tr.clips.map((clip, i) => ({
             id: `${tr.id}-seed-${i}`,
+            bank: null,
+            sampleRef: null,
             ...clip,
         })),
     }));
@@ -49,5 +51,27 @@ export function useArrangement() {
         ));
     }, []);
 
-    return { tracks, addClip, removeClip };
+    const assignSample = useCallback((trackId, clipId, bank, alias) => {
+        setTracks(prev => prev.map(tr => {
+            if (tr.id !== trackId) return tr;
+            return {
+                ...tr,
+                clips: tr.clips.map(c => c.id === clipId ? { ...c, bank, sampleRef: alias } : c),
+            };
+        }));
+
+        // Register with the backend so clip.trigger(clipId) has something
+        // real to play.
+        // clip_add()'s params are positional-or-keyword, so passing bank as
+        // the 4th positional arg matches its signature
+        // matches the quoting style parse_and_execute() already expects.
+        const command = `clip.add("${clipId}", "sampler", "${alias}", "${bank}")`;
+        if (window.audiomix?.sendCommand) {
+            window.audiomix.sendCommand(command);
+        } else {
+            console.warn("[useArrangement] AudioMIX bridge not available, skipping: ", command);
+        }
+    }, []);
+
+    return { tracks, addClip, removeClip, assignSample };
 }

@@ -3,7 +3,7 @@
 //
 // Linear timeline arrangement view -
 // track headers, ruler, clip lanes, playhead
-// Freq view and layered clips are separae components built
+// Freq view and layered clips are separate components built
 // on top of this foundation
 // `playhead` comes in as a prop, not internal state
 // Arrangement is presentational with respect to transport.
@@ -12,11 +12,16 @@
 
 import React from "react";
 import { BARS, BEAT_W } from "../../data/studioData.js";
+import { SAMPLE_BANKS } from "../../data/sampleBanks.js";
 
-export default function Arrangement({ playhead, tracks, onAddClip }) {
+// `tracks` and `onAddClip` now come from useArrangement (owned by App.jsx)
+// not impored directly - Arrangement.js no longer owns clip data
+export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample }) {
     const playheadX = playhead * BEAT_W;
     const containerRef = React.useRef(null);
     const [containerWidth, setContainerWidth] = React.useState(0);
+    // { trackId, clipId } | null
+    const [openPicker, setOpenPicker] = React.useState(null);
 
     React.useEffect(() => {
         if (!containerRef.current) return;
@@ -204,6 +209,7 @@ export default function Arrangement({ playhead, tracks, onAddClip }) {
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const x = e.clientX - rect.left;
                                 const beat = Math.max(0, Math.min(BARS - 1, Math.floor(x / BEAT_W)));
+                                onAddClip(tr.id, beat);
                             }}
                             style={{
                                 height: 44,
@@ -216,7 +222,13 @@ export default function Arrangement({ playhead, tracks, onAddClip }) {
                                 cursor: "cell",
                             }}>
                                 {tr.clips.map((clip, ci) => (
-                                    <div key={ci} onClick={(e) => e.stopPropagation()} style={{
+                                    <div key={ci} onClick={(e) =>
+                                        // still stopPropogation so this doesn't also trigger the lane's
+                                        // onClick and place a new clip underneath 
+                                        {e.stopPropagation();
+                                            setOpenPicker(prev => prev && prev.clipId === clip.id ? null : { trackId: tr.id, clipId: clip.id });
+                                        }} 
+                                        style={{
                                         position: "absolute",
                                         top: 4,
                                         left: clip.start * BEAT_W,
@@ -235,7 +247,36 @@ export default function Arrangement({ playhead, tracks, onAddClip }) {
                                         overflow: "hidden",
                                         whiteSpace: "nowrap",
                                     }}>
-                                        {ci === 0 ? tr.name : ""}
+                                        {clip.sampleRef || (ci === 0 ? tr.name : "")}
+
+                                        {openPicker?.clipId === clip.id && (
+                                            <select 
+                                                autofocus
+                                                onClick={(e) => e.stopPropagation()}
+                                                onChange={(e) => {
+                                                    onAssignSample(tr.id, clip.id, "drums", e.target.value);
+                                                    setOpenPicker(null);
+                                                }}
+                                                defaultValue=""
+                                                style={{
+                                                    position: "absolute",
+                                                    top: 36,
+                                                    left: 0,
+                                                    zIndex: 30,
+                                                    minWidth: 100,
+                                                    fontSize: 9,
+                                                    fontFamily: "var(--fomt-mono)",
+                                                    background: "var(--surface-alt)",
+                                                    color: "var(--text)",
+                                                    border: "1px solid var(--border-bright)",
+                                                    borderRadius: 3,
+                                                }}>
+                                                    <option value="" disabled>assign sample...</option>
+                                                    {SAMPLE_BANKS.drums.sounds.map(s => (
+                                                        <option key={s.alias} value={s.alias}>{s.title}</option>
+                                                    ))}
+                                                </select>
+                                        )}
                                     </div>
                                 ))}
                             </div>
