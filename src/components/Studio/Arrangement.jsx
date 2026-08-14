@@ -248,37 +248,41 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                         whiteSpace: "nowrap",
                                     }}>
                                         {clip.sampleRef || (ci === 0 ? tr.name : "")}
-
-                                        {openPicker?.clipId === clip.id && (
-                                            <select 
-                                                autofocus
-                                                onClick={(e) => e.stopPropagation()}
-                                                onChange={(e) => {
-                                                    onAssignSample(tr.id, clip.id, "drums", e.target.value);
-                                                    setOpenPicker(null);
-                                                }}
-                                                defaultValue=""
-                                                style={{
-                                                    position: "absolute",
-                                                    top: 36,
-                                                    left: 0,
-                                                    zIndex: 30,
-                                                    minWidth: 100,
-                                                    fontSize: 9,
-                                                    fontFamily: "var(--fomt-mono)",
-                                                    background: "var(--surface-alt)",
-                                                    color: "var(--text)",
-                                                    border: "1px solid var(--border-bright)",
-                                                    borderRadius: 3,
-                                                }}>
-                                                    <option value="" disabled>assign sample...</option>
-                                                    {SAMPLE_BANKS.drums.sounds.map(s => (
-                                                        <option key={s.alias} value={s.alias}>{s.title}</option>
-                                                    ))}
-                                                </select>
-                                        )}
                                     </div>
                                 ))}
+
+                                {openPicker?.trackId === tr.id && (() => {
+                                    const openClip = tr.clips.find(c => c.id === openPicker.clipId);
+                                    if (!openClip) return null;
+                                    return (
+                                        <select 
+                                            autofocus
+                                            onClick={(e) => e.stopPropagation()}
+                                            onChange={(e) => {
+                                                onAssignSample(tr.id, clip.id, "drums", e.target.value);
+                                                setOpenPicker(null);
+                                            }}
+                                            defaultValue=""
+                                            style={{
+                                                position: "absolute",
+                                                top: 40,
+                                                left: openClip.start * BEAT_W,
+                                                zIndex: 30,
+                                                minWidth: 100,
+                                                fontSize: 9,
+                                                fontFamily: "var(--fomt-mono)",
+                                                background: "var(--surface-alt",
+                                                color: "var(--text)",
+                                                border: "1px solid var(--border-bright)",
+                                                borderRadius: 3,
+                                            }}>
+                                            <option value="" disabled>assign sample...</option>
+                                            {SAMPLE_BANKS.drums.sounds.map(s => (
+                                                <option key={s.alias} value={s.alias}>{s.title}</option>
+                                            ))}
+                                        </select>
+                                    );
+                                })()}
                             </div>
                         ))}
                     </div>
