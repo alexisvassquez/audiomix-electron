@@ -131,7 +131,7 @@ export default function Arrangement({ playhead }) {
                 </div>
 
                 {/* Scrollable timeline */}
-                <div style={{
+                <div ref={containerRef} style={{
                     flex: 1,
                     overflowX: "auto",
                     overflowY: "hidden",
@@ -149,7 +149,7 @@ export default function Arrangement({ playhead }) {
                         borderBottom: "1px solid var(--border)",
                         position: "relative",
                         minWidth: "100%",
-                        width: "timelineWidth",
+                        width: timelineWidth,
                     }}>
                         {Array.from({ length: BARS }, (_, i) => (
                             <div key={i} style={{
@@ -181,8 +181,8 @@ export default function Arrangement({ playhead }) {
                     <div style={{
                         position: "relative",
                         flex: 1,
-                        mindWidth: "100%",
-                        width: "timelineWidth",
+                        minWidth: "100%",
+                        width: timelineWidth,
                     }}>
                         {/* Playhead line across all lanes */}
                         <div style={{
@@ -204,7 +204,7 @@ export default function Arrangement({ playhead }) {
                                 borderBottom: "1px solid var(--border)",
                                 position: "relative",
                                 minWidth: "100%",
-                                width: "timelineWidth",
+                                width: timelineWidth,
                                 background: ti % 2 === 0 ? "var(--surface)" : "#0b0b0b",
                                 backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent ${BEAT_W - 1}px, var(--border) ${BEAT_W - 1}px, var(--border) ${BEAT_W}px)`,
                             }}>
