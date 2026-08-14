@@ -11,9 +11,9 @@
 // Foundational - no drag and drop (yet)
 
 import React from "react";
-import { TRACKS, BARS, BEAT_W } from "../../data/studioData.js";
+import { BARS, BEAT_W } from "../../data/studioData.js";
 
-export default function Arrangement({ playhead }) {
+export default function Arrangement({ playhead, tracks, onAddClip }) {
     const playheadX = playhead * BEAT_W;
     const containerRef = React.useRef(null);
     const [containerWidth, setContainerWidth] = React.useState(0);
@@ -74,7 +74,7 @@ export default function Arrangement({ playhead }) {
                     borderRight: "1px solid var(--border)",
                     overflow: "hidden",
                 }}>
-                    {TRACKS.map(tr => (
+                    {tracks.map(tr => (
                         <div key={tr.id} style={{
                             height: 44,
                             borderBottom: "1px solid var(--border)",
@@ -198,8 +198,14 @@ export default function Arrangement({ playhead }) {
                             transition: "left .05s linear",
                         }} />
 
-                        {TRACKS.map((tr, ti) => (
-                            <div key={tr.id} style={{
+                        {tracks.map((tr, ti) => (
+                            <div key={tr.id} onClick={(e) => {
+                                // snap click position to the BEAT_W grid
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const x = e.clientX - rect.left;
+                                const beat = Math.max(0, Math.min(BARS - 1, Math.floor(x / BEAT_W)));
+                            }}
+                            style={{
                                 height: 44,
                                 borderBottom: "1px solid var(--border)",
                                 position: "relative",
@@ -207,9 +213,10 @@ export default function Arrangement({ playhead }) {
                                 width: timelineWidth,
                                 background: ti % 2 === 0 ? "var(--surface)" : "#0b0b0b",
                                 backgroundImage: `repeating-linear-gradient(90deg, transparent 0px, transparent ${BEAT_W - 1}px, var(--border) ${BEAT_W - 1}px, var(--border) ${BEAT_W}px)`,
+                                cursor: "cell",
                             }}>
                                 {tr.clips.map((clip, ci) => (
-                                    <div key={ci} style={{
+                                    <div key={ci} onClick={(e) => e.stopPropagation()} style={{
                                         position: "absolute",
                                         top: 4,
                                         left: clip.start * BEAT_W,

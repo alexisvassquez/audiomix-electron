@@ -1,5 +1,9 @@
 // AudioMIX Electron
 // src/hooks/useArrangement.js
+//
+// Owns clip/track state for the Arrangement view
+// Receives tracks and calls addClip on click, but never mutates
+// state directly.
 
 import { useState, useCallback } from "react";
 import { TRACKS as INITIAL_TRACKS } from "../data/studioData.js";
