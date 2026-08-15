@@ -12,6 +12,7 @@ import WebSocket from "ws";
 import { ipcMain } from "electron";
 
 const SHELL_WS_URL = `ws://127.0.0.1:${process.env.AUDIOMIX_API_PORT || 8765}/shell/ws`;
+const API_BASE_URL = `http://127.0.0.1:${process.env.AUDIOMIX_API_PORT || 8765}`;
 const API_TOKEN = process.env.AUDIOMIX_API_TOKEN;
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 15000;
@@ -102,6 +103,39 @@ class ShellBridge {
         } catch (err) {
             return { ok: false, error: err.message };
         }
+    }
+
+    // Shared by enterLive()/exitLive() - these hit plain HTTP routes,
+    // not the WS.
+    // /shell/live/enter and /shell/live/exit are REST endpoints on the FastAPI
+    // bridge (api/routes/shell.py in core), token-protected the same way
+    // as everything else via Depends(verify_token).
+    async _postLiveRoute(path) {
+        try {
+            const res = await fetch(`${API_BASE_URL}${path}`, {
+                method: "POST",
+                headers: { "x-audiomix-token": API_TOKEN },
+            });
+            if (!res.ok) {
+                const text = await res.text().catch(() => "");
+                return { ok: false, error: `HTTP ${res.status}${text ? `: ${text}` : ""}` };
+            }
+            // route may return no body or a JSON ack - tolerate either
+            const data = await res.json().catch(() => ({}));
+            return { ok: true, data };
+        } catch (err) {
+            // covers network-level failures (backend not running, etc)
+            // distinct from a rejected HTTP response above
+            return { ok: false, error: err.message };
+        }
+    }
+
+    enterLive() {
+        return this._postLiveRoute("/shell/live/enter");
+    }
+
+    exitLive() {
+        return this._postLiveRoute("/shell/live/exit");
     }
 
     _emit(channel, payload) {
