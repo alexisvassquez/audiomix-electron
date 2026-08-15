@@ -124,5 +124,30 @@ export function useShellConnection() {
         return window.audiomix.shell.sendCommand(command, branch);
     }, []);
 
-    return { connected, session, lastOutput, lastError, sendCommand };
+    /* Requests the backend enter LIVE mode - starts the AudioScript
+       runtime subproc if it isn't already running.
+       First entry only - subsequent entries just resume, per the pause/resume
+       LIVE mode design.
+       Returns a promise resolving to { ok: true } or { ok: false, error }.
+       Resolves once the HTTP round-trip completes.
+       Resulting branch change itself arrives async via the next
+       "session_update" message, reflected in `session.audioscript_branch`.
+       This function does not flip local state, backend is source of truth for
+       whether the switch actually succeeded. 
+    */
+    const enterLive = useCallback(() => {
+        return window.audiomix.shell.enterLive();
+    }, []);
+
+    /* Requests the backend exit LIVE mode.
+       Per the pause/resume design, this does not kill the runtime
+       subproc.
+       It stays alive idle in the bckgrnd so a future enterLive() is instant.
+       Same resolve/response shape as enterLive() 
+    */
+   const exitLive = useCallback(() => {
+    return window.audiomix.shell.exitLive();
+   }, []);
+
+    return { connected, session, lastOutput, lastError, sendCommand, enterLive, exitLive };
 }
