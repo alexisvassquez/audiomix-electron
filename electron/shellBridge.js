@@ -10,6 +10,7 @@
 
 import WebSocket from "ws";
 import { ipcMain } from "electron";
+console.log("[shellBridge] fetch available:", typeof fetch);
 
 const SHELL_WS_URL = `ws://127.0.0.1:${process.env.AUDIOMIX_API_PORT || 8765}/shell/ws`;
 const API_BASE_URL = `http://127.0.0.1:${process.env.AUDIOMIX_API_PORT || 8765}`;
