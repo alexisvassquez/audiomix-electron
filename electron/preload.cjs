@@ -1,3 +1,6 @@
+// AudioMIX Electron
+// electron/preload.cjs
+
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("audiomix", {
@@ -15,6 +18,8 @@ contextBridge.exposeInMainWorld("audiomix", {
     sendCommand: (command, branch = "live") =>
       ipcRenderer.invoke("shell:send", { command, branch }),
     isConnected: () => ipcRenderer.invoke("shell:isConnected"),
+    enterLive: () => ipcRenderer.invoke("shell:enterLive"),
+    exitLive: () => ipcRenderer.invoke("shell:exitLive"),
     onMessage: (callback) => {
       const listener = (_event, envelope) => callback(envelope);
       ipcRenderer.on("shell:message", listener);
