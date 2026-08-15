@@ -111,6 +111,7 @@ class ShellBridge {
     // bridge (api/routes/shell.py in core), token-protected the same way
     // as everything else via Depends(verify_token).
     async _postLiveRoute(path) {
+        const url = `${API_BASE_URL}${path}`;
         try {
             const res = await fetch(`${API_BASE_URL}${path}`, {
                 method: "POST",
@@ -126,6 +127,7 @@ class ShellBridge {
         } catch (err) {
             // covers network-level failures (backend not running, etc)
             // distinct from a rejected HTTP response above
+            console.log(`[shellBridge] ${url} -> request failed: ${err.message}`);
             return { ok: false, error: err.message };
         }
     }

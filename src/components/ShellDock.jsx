@@ -50,6 +50,7 @@ export default function ShellDock() {
     const [log, setLog] = useState([
         { id: nextLogId(), kind: "system", time: timestamp(), text: "shell dock mounted" },
     ]);
+    const [branchPending, setBranchPending] = useState(false);
 
     const logRef = useRef(null);
     // Track the last output/error object we already logged, so the
@@ -127,6 +128,32 @@ export default function ShellDock() {
 
     const branch = session?.audioscript_branch ?? "ir";
 
+    // Shared handler for both toggle halves.
+    // `target` is "ir" or "live" - the branch that half represents.
+    // Clicking the half that's already active is a no-op rather than
+    // re-sending the same request.
+    const handleBranchClick = async (target) => {
+        if (branchPending || target === branch) return;
+
+        setBranchPending(true);
+        appendLog("system", target === "live" ? "entering LIVE mode..." : "exiting LIVE mode...");
+
+        try {
+            const fn = target === "live" ? enterLive : exitLive;
+            const res = await fn();
+            if (!res || res.ok === false) {
+                appendLog("error", res?.error ?? `failed to switch to ${target}`);
+            }
+            // no local branch state to flip here on success
+            // the backend's session_update (handled in useEffect above)
+            // is what actually moves `branch` once the switch lands.
+        } catch (err) {
+            appendLog("error", err.messge ?? `failed to switch to ${target}`);
+        } finally {
+            setBranchPending(false);
+        }
+    };
+
     return (
         <div className={`shell-dock ${open ? "open" : "closed"}`}>
             <div className="am-panel-header">
@@ -141,10 +168,22 @@ export default function ShellDock() {
                 <div className="am-spacer" />
 
                 <div className="dock-right">
-                    <div className="branch-toggle" title="Branch switching not yet wired">
+                    <div 
+                        className="branch-toggle" 
+                        title={branchPending ? "Switching..." : "Click IR or LIVE to switch branch"}
+                        style={{ opacity: branchPending ? 0.6 : 1 }} 
+                    >
                         <div className={`branch-slider ${branch === "live" ? "live" : ""}`} />
-                        <div className={`branch-option ir ${branch === "ir" ? "active" : ""}`}>IR</div>
-                        <div className={`branch-option live ${branch === "live" ? "active" : ""}`}>LIVE</div>
+                        <div 
+                            className={`branch-option ir ${branch === "ir" ? "active" : ""}`}
+                            onClick={() => handleBranchClick("ir")}
+                            style={{ cursor: branchPending ? "wait" : "pointer" }}
+                        >IR</div>
+                        <div 
+                            className={`branch-option live ${branch === "live" ? "active" : ""}`}
+                            onClick={() => handleBranchClick("live")}
+                            style={{ cursor: branchPending ? "wait" : "pointer" }}
+                        >LIVE</div>
                     </div>
                     <div className="am-divider-v" />
                     <div className="status-pill">
