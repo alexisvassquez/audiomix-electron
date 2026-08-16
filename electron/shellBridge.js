@@ -154,6 +154,8 @@ class ShellBridge {
         ipcMain.handle("shell:isConnected", () => {
             return this.ws?.readyState === WebSocket.OPEN;
         });
+        ipcMain.handle("shell:enterLive", () => this.enterLive());
+        ipcMain.handle("shell:exitLive", () => this.exitLive());
     }
 
     destroy() {
