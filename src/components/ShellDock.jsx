@@ -43,7 +43,7 @@ function nextLogId() {
 }
 
 export default function ShellDock() {
-    const { connected, session, lastOutput, lastError, sendCommand } = useShellConnection();
+    const { connected, session, lastOutput, lastError, sendCommand, enterLive, exitLive } = useShellConnection();
 
     const [open, setOpen] = useState(true);
     const [inputValue, setInputValue] = useState("");
@@ -148,7 +148,7 @@ export default function ShellDock() {
             // the backend's session_update (handled in useEffect above)
             // is what actually moves `branch` once the switch lands.
         } catch (err) {
-            appendLog("error", err.messge ?? `failed to switch to ${target}`);
+            appendLog("error", err.message ?? `failed to switch to ${target}`);
         } finally {
             setBranchPending(false);
         }
