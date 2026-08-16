@@ -158,6 +158,7 @@
     flex-direction: column;
     gap: 1px;
     font-size: 10.5px;
+    font-family: var(--font-mono), "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 
 .log-line {
