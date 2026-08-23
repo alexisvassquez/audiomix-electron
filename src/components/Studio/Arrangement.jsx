@@ -8,7 +8,6 @@
 // `playhead` comes in as a prop, not internal state
 // Arrangement is presentational with respect to transport.
 // App.jsx owns useTransport, so `transport.playhead` is passed down.
-// Foundational - no drag and drop (yet)
 
 import React from "react";
 import { BARS, BEAT_W } from "../../data/studioData.js";
@@ -34,6 +33,36 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
     }, []);
 
     const timelineWidth = Math.max(BARS * BEAT_W, containerWidth);
+
+    // Converts a mouse x-position into a beat value and calls onSeek.
+    // Not snapped to BEAT_W grid like click-to-place clips are,
+    // scrubbing should track the cursor continuously, not jump to the
+    // nearest beat.
+    const seekFromClientX = (clientX) => {
+        if (!rulerRef.current || !onSeek) return;
+        const rect = rulerRef.current.getBoundingClientRect();
+        const x = clientX - rect.left;
+        // Clamp just under BARS rather than at it - useTransport's playhead
+        // wraps to 0 at >= BARS, so landing exactly on BARS would visually
+        // read as the very start of the loop instead of the very end.
+        const beat = Math.max(0, Math.min(BARS - 0.01, x / BEAT_W));
+        onSeek(beat);
+    };
+
+    // mousedown seeks immediately, then tracks mousemove/mouseup on
+    // window (not just the ruler) so dragging outside the ruler's
+    // bounds will still holding the mouse button continues to scrub
+    // instead of stopping the moment the cursor leaves the strip.
+    const handleRulerMouseDown = (e) => {
+        seekFromClientX(e.clientX);
+        const handleMouseMove = (moveEvent) => seekFromClientX(moveEvent.clientX);
+        const handleMouseUp = () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+    };
 
     return (
         <div style={{
@@ -206,6 +235,7 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                         {tracks.map((tr, ti) => (
                             <div key={tr.id} onClick={(e) => {
                                 // snap click position to the BEAT_W grid
+                                // getBoundingClientRect() accounts for horizontal scroll
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const x = e.clientX - rect.left;
                                 const beat = Math.max(0, Math.min(BARS - 1, Math.floor(x / BEAT_W)));
@@ -251,6 +281,9 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                     </div>
                                 ))}
 
+                                // Sample picker - rendered as a sibling of the clips, not a child.
+                                // The clip div above has overflow:"hidden"
+                                // (truncates long names)
                                 {openPicker?.trackId === tr.id && (() => {
                                     const openClip = tr.clips.find(c => c.id === openPicker.clipId);
                                     if (!openClip) return null;

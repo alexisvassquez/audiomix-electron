@@ -76,7 +76,8 @@ export default function App() {
                         playhead={transport.playhead} 
                         tracks={tracks}
                         onAddClip={addClip}
-                        onAssignSample={assignSample} 
+                        onAssignSample={assignSample}
+                        onSeek={transport.seekTo} 
                     />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement
