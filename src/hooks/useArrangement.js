@@ -66,8 +66,8 @@ export function useArrangement() {
         // the 4th positional arg matches its signature
         // matches the quoting style parse_and_execute() already expects.
         const command = `clip.add("${clipId}", "sampler", "${alias}", "${bank}")`;
-        if (window.audiomix?.sendCommand) {
-            window.audiomix.sendCommand(command);
+        if (window.audiomix?.shell?.sendCommand) {
+            window.audiomix.shell.sendCommand(command);
         } else {
             console.warn("[useArrangement] AudioMIX bridge not available, skipping: ", command);
         }
