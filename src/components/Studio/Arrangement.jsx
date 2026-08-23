@@ -281,9 +281,7 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                     </div>
                                 ))}
 
-                                // Sample picker - rendered as a sibling of the clips, not a child.
-                                // The clip div above has overflow:"hidden"
-                                // (truncates long names)
+                                {/*Sample picker - rendered as a sibling of the clips, not a child.*/}
                                 {openPicker?.trackId === tr.id && (() => {
                                     const openClip = tr.clips.find(c => c.id === openPicker.clipId);
                                     if (!openClip) return null;
