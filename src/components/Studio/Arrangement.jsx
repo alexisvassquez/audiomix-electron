@@ -15,9 +15,10 @@ import { SAMPLE_BANKS } from "../../data/sampleBanks.js";
 
 // `tracks` and `onAddClip` now come from useArrangement (owned by App.jsx)
 // not impored directly - Arrangement.js no longer owns clip data
-export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample }) {
+export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample, onSeek }) {
     const playheadX = playhead * BEAT_W;
     const containerRef = React.useRef(null);
+    const rulerRef = React.useRef(null);
     const [containerWidth, setContainerWidth] = React.useState(0);
     // { trackId, clipId } | null
     const [openPicker, setOpenPicker] = React.useState(null);
@@ -175,7 +176,7 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                 }}>
 
                     {/* Ruler */}
-                    <div style={{
+                    <div ref={rulerRef} onMouseDown={handleRulerMouseDown} style={{
                         height: 20,
                         flexShrink: 0,
                         display: "flex",
@@ -184,6 +185,7 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                         position: "relative",
                         minWidth: "100%",
                         width: timelineWidth,
+                        cursor: "pointer",
                     }}>
                         {Array.from({ length: BARS }, (_, i) => (
                             <div key={i} style={{
