@@ -9,6 +9,28 @@ The AudioMIX core engine has its own separate changelog in the [AudioMIX Core re
 
 ---
 
+## [0.5.0] — 2026-08-22
+
+### Added
+
+- **Click-to-place clips.** Clicking an empty spot in a track lane in `Arrangement.jsx` now creates a clip snapped to the `BEAT_W` grid, via a new `useArrangement.js` hook that owns clip/track state (seeded from `studioData.js`'s static `TRACKS`, with stable per-clip `id`s replacing the old array-index keys).
+- **Sample assignment.** Clicking an existing clip opens a dropdown (`sampleBanks.js`) to assign a sound from the `drums` bank. Selecting one updates the clip locally and sends `clip.add(...)` to the backend over the existing shell bridge, so the clip has something real registered to trigger later.
+- **LIVE/IR toggle, actually wired.** The branch toggle in `ShellDock.jsx` previously only displayed the current branch — clicking it did nothing (`/shell/live/enter` and `/shell/live/exit` were never called). Added `enterLive()`/`exitLive()` to `shellBridge.js` (authenticated `fetch` to those routes, same token boundary as `sendCommand`), exposed them through `preload.cjs` and `useShellConnection.js`, and wired real `onClick` handlers with a `branchPending` guard against double-clicks mid-transition. The toggle does not optimistically flip state — it waits for the backend's `session_update` to confirm the switch actually landed.
+- **Playback scheduler.** New `usePlaybackScheduler.js` hook watches `transport.playhead` and fires `clip.trigger(clipId)` the instant playhead crosses an assigned clip's `start` beat. Handles loop wrap-around (playhead resetting past `BARS`) and guards against firing on manual seeks/stops (a `stop()`-triggered jump back to `0` should not read as "swept across the whole timeline").
+
+### Fixed
+
+- `Arrangement.jsx` — `containerRef` was created but never attached to any element, so the `ResizeObserver` added in 0.3.1 was never actually observing anything; `containerWidth` was permanently stuck at `0`. Also fixed `width: "timelineWidth"` appearing as a literal string (not the computed variable) in three separate style blocks, and a `mindWidth` → `minWidth` typo. Together these three bugs are why the responsive-width work landed in 0.3.1 but was flagged there as "not yet verified end-to-end."
+- Sample picker dropdown was rendering invisibly — it lived inside the clip `<div>`, which has `overflow: "hidden"` (to truncate long clip names), silently clipping the dropdown since it was positioned outside that box. Moved the picker to render as a sibling within the track lane instead.
+- `useArrangement.js`'s `assignSample()` checked `window.audiomix?.sendCommand`, which doesn't exist — the real path is `window.audiomix.shell.sendCommand`, nested under `shell` alongside `enterLive`/`exitLive`. This meant every sample assignment silently updated local UI state but never actually reached the backend, for the entire time the feature existed until caught.
+
+### Notes
+
+- **Milestone:** closes the STUDIO MVP core loop end-to-end — place a clip, assign a sound, hit play, hear it. See the core engine repo's `CHANGELOG.md` `[v0.9-dev]` entry for the backend-side fixes (sampler bank boot loading, LED color bug, `clip_launcher.py` crash) this also depended on.
+- Several of tonight's bugs were "invisible" failure modes rather than crashes — a wrong `window.audiomix` path, an `err.messge` typo swallowing real error text, a CSS clipping issue — each of which looked like "nothing happened" rather than throwing. Worth remembering for future debugging: silence is a symptom, not an absence of a bug.
+
+---
+
 ## [0.4.0] — 2026-07-31
 
 ### Added

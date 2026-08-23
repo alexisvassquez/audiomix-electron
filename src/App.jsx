@@ -13,6 +13,7 @@ import { useTransport } from "./hooks/useTransport.js";
 import Arrangement from "./components/Studio/Arrangement.jsx";
 import ShellDock from "./components/ShellDock.jsx";
 import { useArrangement } from "./hooks/useArrangement.js";
+import { usePlaybackScheduler } from "./hooks/usePlaybackScheduler.js";
 
 const PROJECT = "OOEPUI_NIGHT_01";
 
@@ -21,6 +22,7 @@ export default function App() {
 
     const transport = useTransport();
     const { tracks, addClip, assignSample } = useArrangement();
+    usePlaybackScheduler(tracks, transport.playhead, transport.playing);
 
     // Debug
     React.useEffect(() => {
