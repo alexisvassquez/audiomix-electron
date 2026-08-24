@@ -29,7 +29,7 @@ let nextClipId = 1000;
 export function useArrangement() {
     const [tracks, setTracks] = useState(() => withClipIds(INITIAL_TRACKS));
 
-    // default clip lenght = 2 beats on click
+    // default clip length = 2 beats on click
     const addClip = useCallback((trackId, startBeat, lenBeats = 2) => {
         setTracks(prev => prev.map(tr => {
             if (tr.id !== trackId) return tr;
@@ -73,5 +73,35 @@ export function useArrangement() {
         }
     }, []);
 
-    return { tracks, addClip, removeClip, assignSample };
+    {/** Overlap clips, drag and drop */}
+    const moveClip = useCallback((trackId, clipId, newStart) => {
+        setTracks(prev => prev.map(tr => {
+            if (tr.id !== trackId) return tr;
+
+            const movingClip = tr.clips.find(c => c.id == clipId);
+            if (!movingClip) return tr;
+
+            const start = Math.max(0, newStart);
+
+            {/* Same overlap check as addClip - reject the move (state
+                stays unchanged) rather than let it land on top of
+                another clip.
+                The caller clears its drag preview either way, so a rejected
+                move visually snaps back to the clip's original position. 
+            */}
+            const overlaps = tr.clips.some(c =>
+                c.id !== clipId &&
+                start < c.start + c.len &&
+                start + movingClip.len > c.start
+            );
+            if (overlaps) return tr;
+
+            return {
+                ...tr,
+                clips: tr.clips.map(c => c.id === clipId ? { ...c, start } : c),
+            };
+        }));
+    }, []);
+
+    return { tracks, addClip, removeClip, assignSample, moveClip };
 }

@@ -15,13 +15,17 @@ import { SAMPLE_BANKS } from "../../data/sampleBanks.js";
 
 // `tracks` and `onAddClip` now come from useArrangement (owned by App.jsx)
 // not impored directly - Arrangement.js no longer owns clip data
-export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample, onSeek }) {
+export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample, onSeek, onMoveClip }) {
     const playheadX = playhead * BEAT_W;
     const containerRef = React.useRef(null);
     const rulerRef = React.useRef(null);
     const [containerWidth, setContainerWidth] = React.useState(0);
     // { trackId, clipId } | null
     const [openPicker, setOpenPicker] = React.useState(null);
+    // { trackId, clipId, start } | null - live preview position while
+    // dragging a clip.
+    // cleared on mouseup regardless of outcome.
+    const [dragState, setDragState] = React.useState(null);
 
     React.useEffect(() => {
         if (!containerRef.current) return;
@@ -63,6 +67,70 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
         };
         window.addEventListener("mousemove", handleMouseMove);
         window.addEventListener("mouseup", handleMouseUp);
+    };
+
+    // Pixels of movement before a mousedown-on-clip counts as a drag
+    // rather than a click.
+    // Below this, releasing opens the sample picker (exisiting behavior);
+    // above it, the clip moves.
+    const CLIP_DRAG_THRESHOLD_PX = 4;
+
+    const handleClipMouseDown = (e, track, clip) => {
+        // blocks the lane's own onClick (add a new clip) from firing
+        // due to the click event that follows this mousedown/up pair.
+        e.stopPropagation();
+
+        const startX = e.clientX;
+        let dragged = false;
+        let previewStart = clip.start;
+        // Tracks the last value actually pushed to state, so rapid
+        // mousemove events that land on the same rounded beat don't
+        // each trigger a full re-render.
+        // Erratic/fast dragging can fire many mousemove events per
+        // rendered frame; w/o this guard, every single one created a new
+        // obj and forced a re-render of the entire track/clip tree, which
+        // was heavy enough to hang the renderer.
+        let lastPushedStart = clip.start;
+
+        const handleMove = (moveEvent) => {
+            const deltaPx = moveEvent.clientX - startX;
+            if (!dragged && Math.abs(deltaPx) < CLIP_DRAG_THRESHOLD_PX) return;
+            dragged = true;
+
+            const deltaBeats = deltaPx / BEAT_W;
+            previewStart = Math.max(
+                0,
+                Math.min(BARS - clip.len, Math.round(clip.start + deltaBeats))
+            );
+
+            // no visual change, skip the re-render
+            if (previewStart === lastPushedStart) return;
+            lastPushedStart = previewStart;
+            setDragState({ trackId: track.id, clipId: clip.id, start: previewStart });
+        };
+
+        const handleUp = () => {
+            window.removeEventListener("mousemove", handleMove);
+            window.removeEventListener("mouseup", handleUp);
+            setDragState(null);
+
+            if (dragged) {
+                if (previewStart !== clip.start && onMoveClip) {
+                    onMoveClip(track.id, clip.id, previewStart);
+                }
+                // if rejected (overlap) or unchanged, clearing dragState
+                // above already snaps the clip visually back to
+                // clip.start - no further action needed.
+            } else {
+                // not a drag - treat as the existing click-to-assign behavior
+                setOpenPicker(prev =>
+                    prev && prev.clipId == clip.id ? null : { trackId: track.id, clipId: clip.id }
+                );
+            }
+        };
+
+        window.addEventListener("mousemove", handleMove);
+        window.addEventListener("mouseup", handleUp);
     };
 
     return (
@@ -254,16 +322,16 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                 cursor: "cell",
                             }}>
                                 {tr.clips.map((clip, ci) => (
-                                    <div key={ci} onClick={(e) =>
-                                        // still stopPropogation so this doesn't also trigger the lane's
-                                        // onClick and place a new clip underneath 
-                                        {e.stopPropagation();
-                                            setOpenPicker(prev => prev && prev.clipId === clip.id ? null : { trackId: tr.id, clipId: clip.id });
-                                        }} 
+                                    <div key={clip.Id} onClick={(e) =>
+                                        // still stopPropogation so this 
+                                        // doesn't also trigger the lane's
+                                        // onClick and place a new clip underneath
+                                        e.stopPropagation()}
+                                        onMouseDown={(e) => handleClipMouseDown(e, tr, clip)} 
                                         style={{
                                         position: "absolute",
                                         top: 4,
-                                        left: clip.start * BEAT_W,
+                                        left: (dragState?.clipId == clip.id ? dragState.start : clip.start) * BEAT_W,
                                         width: clip.len * BEAT_W - 2,
                                         height: 34,
                                         borderRadius: 3,
@@ -275,9 +343,10 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                         display: "flex",
                                         alignItems: "center",
                                         padding: "0 5px",
-                                        cursor: "pointer",
+                                        cursor: dragState?.clipId === clip.id ? "grabbing" : "grab",
                                         overflow: "hidden",
                                         whiteSpace: "nowrap",
+                                        opacity: dragState?.clipId === clip.id ? 0.7 : 1,
                                     }}>
                                         {clip.sampleRef || (ci === 0 ? tr.name : "")}
                                     </div>
@@ -303,8 +372,8 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                                 zIndex: 30,
                                                 minWidth: 100,
                                                 fontSize: 9,
-                                                fontFamily: "var(--fomt-mono)",
-                                                background: "var(--surface-alt",
+                                                fontFamily: "var(--font-mono)",
+                                                background: "var(--surface-alt)",
                                                 color: "var(--text)",
                                                 border: "1px solid var(--border-bright)",
                                                 borderRadius: 3,
