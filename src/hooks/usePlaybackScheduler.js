@@ -45,6 +45,9 @@ export function usePlaybackScheduler(tracks, playhead, playing) {
         if (totalSpan > MAX_TICK_DELTA) return;    // seek/stop jump - skip
 
         for (const track of tracks) {
+            // muted tracks don't trigger
+            if (track.muted) continue;
+
             for (const clip of track.clips) {
                 if (!clip.sampleRef) continue;
 
