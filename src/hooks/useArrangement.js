@@ -14,6 +14,7 @@ import { TRACKS as INITIAL_TRACKS } from "../data/studioData.js";
 function withClipIds(tracks) {
     return tracks.map(tr => ({
         ...tr,
+        muted: false,
         clips: tr.clips.map((clip, i) => ({
             id: `${tr.id}-seed-${i}`,
             bank: null,
@@ -103,5 +104,11 @@ export function useArrangement() {
         }));
     }, []);
 
-    return { tracks, addClip, removeClip, assignSample, moveClip };
+    const toggleMute = useCallback((trackId) => {
+        setTracks(prev => prev.map(tr =>
+            tr.id === trackId ? { ...tr, muted: !tr.muted } : tr
+        ));
+    }, []);
+
+    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute };
 }
