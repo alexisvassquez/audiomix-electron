@@ -44,9 +44,16 @@ export function usePlaybackScheduler(tracks, playhead, playing) {
         const totalSpan = ranges.reduce((sum, [a, b]) => sum + (b - a), 0);
         if (totalSpan > MAX_TICK_DELTA) return;    // seek/stop jump - skip
 
+        const anySoloed = tracks.some(t => t.solo);
+
         for (const track of tracks) {
-            // muted tracks don't trigger
+            // Muted tracks don't trigger
+            // If any track is soloed, tracks that aren't soloed
+            // are silenced too, even if they aren't individually muted.
+            // A track that's both muted and soloed stays silent (mute wins
+            // on itself), but still silences everyone else.
             if (track.muted) continue;
+            if (anySoloed && !track.solo) continue;
 
             for (const clip of track.clips) {
                 if (!clip.sampleRef) continue;

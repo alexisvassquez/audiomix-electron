@@ -79,7 +79,8 @@ export default function App() {
                         onAssignSample={assignSample}
                         onSeek={transport.seekTo}
                         onMoveClip={moveClip}
-                        onToggleMute={toggleMute} 
+                        onToggleMute={toggleMute}
+                        onToggleSolo={onToggleSolo} 
                     />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement

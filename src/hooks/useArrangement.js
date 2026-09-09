@@ -15,6 +15,7 @@ function withClipIds(tracks) {
     return tracks.map(tr => ({
         ...tr,
         muted: false,
+        solo: false,
         clips: tr.clips.map((clip, i) => ({
             id: `${tr.id}-seed-${i}`,
             bank: null,
@@ -110,5 +111,11 @@ export function useArrangement() {
         ));
     }, []);
 
-    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute };
+    const toggleSolo = useCallback((trackId) => {
+        setTracks(prev => prev.map(tr =>
+            tr.id === trackId ? { ...tr, solo: !tr.solo } : tr
+        ));
+    }, []);
+
+    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute, toggleSolo };
 }
