@@ -21,7 +21,7 @@ export default function App() {
     const [mode, setMode] = useState("STUDIO");
 
     const transport = useTransport();
-    const { tracks, addClip, assignSample, moveClip, toggleMute } = useArrangement();
+    const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo } = useArrangement();
     usePlaybackScheduler(tracks, transport.playhead, transport.playing);
 
     // Debug
@@ -80,7 +80,7 @@ export default function App() {
                         onSeek={transport.seekTo}
                         onMoveClip={moveClip}
                         onToggleMute={toggleMute}
-                        onToggleSolo={onToggleSolo} 
+                        onToggleSolo={toggleSolo} 
                     />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement

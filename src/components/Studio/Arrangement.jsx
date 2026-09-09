@@ -15,7 +15,7 @@ import { SAMPLE_BANKS } from "../../data/sampleBanks.js";
 
 // `tracks` and `onAddClip` now come from useArrangement (owned by App.jsx)
 // not impored directly - Arrangement.js no longer owns clip data
-export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample, onSeek, onMoveClip, onToggleMute }) {
+export default function Arrangement({ playhead, tracks, onAddClip, onAssignSample, onSeek, onMoveClip, onToggleMute, onToggleSolo }) {
     const playheadX = playhead * BEAT_W;
     const containerRef = React.useRef(null);
     const rulerRef = React.useRef(null);
@@ -223,15 +223,19 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                 background: tr.muted ? "var(--warn)" : "#ffaa0018",
                                 color: tr.muted ? "#000" : "var(--warn)",
                             }}>M</button>
-                            <button style={{
+                            <button onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleSolo && onToggleSolo(tr.id);
+                            }} 
+                                style={{
                                 width: 15,
                                 height: 15,
                                 borderRadius: 2,
                                 border: "none",
                                 cursor: "pointer",
                                 fontSize: 7,
-                                background: "var(--accent-dim)",
-                                color: "var(--accent)",
+                                background: tr.solo ? "var(--accent)" : "var(--accent-dim)",
+                                color: tr.solo ? "#000" : "var(--accent)",
                             }}>S</button>
                         </div>
                     ))}
