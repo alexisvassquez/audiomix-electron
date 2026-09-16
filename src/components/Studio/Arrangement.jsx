@@ -330,7 +330,7 @@ export default function Arrangement({ playhead, tracks, onAddClip, onAssignSampl
                                 cursor: "cell",
                             }}>
                                 {tr.clips.map((clip, ci) => (
-                                    <div key={clip.Id} onClick={(e) =>
+                                    <div key={clip.id} onClick={(e) =>
                                         // still stopPropogation so this 
                                         // doesn't also trigger the lane's
                                         // onClick and place a new clip underneath
