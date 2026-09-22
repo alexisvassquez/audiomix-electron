@@ -81,6 +81,30 @@ ipcMain.handle("project:save", async (_evt, projectData) => {
   }
 });
 
+ipcMain.handle("project:load", async () => {
+  const w = BrowserWindow.getFocusedWindow();
+  if (!w) return { ok: false, error: "no_window" };
+
+  const { canceled, filePaths } = await dialog.showOpenDialog(w, {
+    title: "Open AudioMIX Project",
+    properties: ["openFile"],
+    filters: [{ name: "AudioMIX Project", extensions: ["audiomix"] }],
+  });
+
+  if (canceled || !filePaths?.length) return { ok: false, error: "cancelled" };
+
+  try {
+    const raw = await fs.readFile(filePaths[0], "utf-8");
+    const projectData = JSON.parse(raw);
+    return { ok: true, projectData, filePath: filePaths[0] };
+  } catch (err) {
+    // covers both a real file-read failure and malformed/corrupt JSON
+    // either way, the renderer needs a clear reason, not a raw parser
+    // stack trace, since this could be a user opening the wrong file.
+    return { ok: false, error: `Could not open project: ${err.message}` };
+  }
+});
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1600,

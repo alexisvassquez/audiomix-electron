@@ -93,7 +93,7 @@ export default function App() {
             <TopBar
                 mode={mode}
                 onModeChange={setMode}
-                project={PROJECT}
+                project={projectName}
                 onRename={setProjectName}
                 onSave={handleSave}
                 onLoad={handleLoad}
@@ -156,7 +156,7 @@ export default function App() {
             {/* Status bar - always visible */}
             <StatusBar
                 mode={mode}
-                project={PROJECT}
+                project={projectName}
                 engineOnline={transport.playing}
             />
 
