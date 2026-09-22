@@ -14,6 +14,10 @@ contextBridge.exposeInMainWorld("audiomix", {
   commands: {
     run: (id) => ipcRenderer.invoke("cmd:run", id)
   },
+  project: {
+    save: (projectData) => ipcRenderer.invoke("project:save", projectData),
+    load: () => ipcRenderer.invoke("project:load"),
+  },
   shell: {
     sendCommand: (command, branch = "live") =>
       ipcRenderer.invoke("shell:send", { command, branch }),

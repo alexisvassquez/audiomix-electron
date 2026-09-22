@@ -9,6 +9,7 @@ import { join } from "path";
 import { fileURLToPath } from "url";
 import os from "os";
 import process from "process";
+import fs from "fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +47,37 @@ ipcMain.handle("cmd:run", async (_evt, id) => {
       return "DevTools toogled";
     default:
       return `Unknown command: ${id}`;
+  }
+});
+
+// Project save/load
+// File I/O has to happen here in the main process.
+// The renderer has no direct filesys access under sandbox (contextIsolation)
+// Renderer hands plan JS obj and returns back.
+// v1 scope: arrangement (tracks/clips/samples/mute/solo), project name, and
+// BPM/snap.
+// TODO: DSP param values (gain, clipper, EQ, etc) are not saved yet.
+// Working on cpp engine reporting its own values back.
+// Frontend does not currently track the values, so nothing accurate to
+// serialize as of yet.
+ipcMain.handle("project:save", async (_evt, projectData) => {
+  const w = BrowserWindow.getFocusedWindow();
+  if (!w) return { ok: false, error: "no_window" };
+
+  const { canceled, filePath } = await dialog.showSaveDialog(w, {
+    title: "Save AudioMIX Project",
+    defaultPath: `${projectData.projectName || "untitled"}.audiomix`,
+    filters: [{ name: "AudioMIX Project", extensions: ["audiomix"] }],
+  });
+
+  if (canceled || !filePath) return { ok: false, error: "cancelled" };
+
+  try {
+    const json = JSON.stringify(projectData, null, 2);
+    await fs.writeFile(filePath, json, "utf-8");
+    return { ok: true, filePath };
+  } catch (err) {
+    return { ok: false, error: err.message };
   }
 });
 
