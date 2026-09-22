@@ -10,7 +10,30 @@ import React from "react";
 
 const MODES = ["STUDIO", "LIVE", "PERFORM"];
 
-export default function TopBar({ mode, onModeChange, project }) {
+export default function TopBar({ mode, onModeChange, project, onRename, onSave, onLoad }) {
+    // Click to rename: local edit state only, commits back up to
+    // App.jsx (real source of truth for projectName) on blur or
+    // Enter.
+    // Esc reverts w/o committing.
+    const [editing, setEditing] = React.useState(false);
+    const [draftName, setDraftName] = React.useState(project);
+
+    // Keep the draft in sync if the real project name changes from
+    // elsewhere, such as a project just loaded.
+    React.useEffect(() => {
+        if (!editing) setDraftName(project);
+    }, [project, editing]);
+
+    const commitRename = () => {
+        setEditing(false);
+        const trimmed = draftName.trim();
+        if (trimmed && trimmed !== project && onRename) {
+            onRename(trimmed);
+        } else {
+            setDraftName(project);
+        }
+    };
+
     return (
         <div style={{
             height: "var(--topbar-h)",
@@ -82,7 +105,13 @@ export default function TopBar({ mode, onModeChange, project }) {
 
             <div className="am-spacer"/>
 
-            {/* Project name */}
+            {/* Save / Open */}
+            <button className="am-btn" onClick={onSave} title="Save project">Save</button>
+            <button className="am-btn" onClick={onLoad} title="Open project">Open</button>
+
+            <div className="am-divider-v"/>
+
+            {/* Project name - click to rename */}
             <div style={{
                 fontSize: 11,
                 color: "var(--text-dim)",
@@ -91,7 +120,39 @@ export default function TopBar({ mode, onModeChange, project }) {
                 gap: 6,
             }}>
                 Project:
-                <span style= {{ color: "var(--text)" }}>{project}</span>
+                {editing ? (
+                    <input
+                        autoFocus
+                        value={draftName}
+                        onChange={(e) => setDraftName(e.target.value)}
+                        onBlur={commitRename}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") commitRename();
+                            if (e.key === "Escape") {
+                                setDraftName(project);
+                                setEditing(false);
+                            }
+                        }}
+                        style={{
+                            background: "var(--surface-alt)",
+                            border: "1px solid var(--accent-mid)",
+                            color: "var(--text)",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 11,
+                            padding: "1px 4px",
+                            borderRadius: 3,
+                            width: 150,
+                        }}
+                    />    
+                ) : (
+                    <span
+                        onClick={() => setEditing(true)}
+                        title="Click to rename" 
+                        style= {{ color: "var(--text)", cursor: "text" }}
+                    >
+                        {project}
+                    </span>
+                )}
             </div>
 
             <div className="am-divider-v"/>

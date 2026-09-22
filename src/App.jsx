@@ -15,14 +15,60 @@ import ShellDock from "./components/ShellDock.jsx";
 import { useArrangement } from "./hooks/useArrangement.js";
 import { usePlaybackScheduler } from "./hooks/usePlaybackScheduler.js";
 
-const PROJECT = "OOEPUI_NIGHT_01";
+const DEFAULT_PROJECT_NAME = "OOEPUI_NIGHT_01";
 
 export default function App() {
     const [mode, setMode] = useState("STUDIO");
+    // Project name is now real state, not a hardcoded constant.
+    // Producers need to rename/create their own projects.
+    // Original name is kept as default for fresh session and
+    // it is not a fixed identity.
+    const [projectName, setProjectName] = useState(DEFAULT_PROJECT_NAME);
 
     const transport = useTransport();
-    const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo } = useArrangement();
+    const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks } = useArrangement();
     usePlaybackScheduler(tracks, transport.playhead, transport.playing);
+
+    // Gathers everything persisted in v1: arrangement, project name,
+    // BPM/snap.
+    // TODO: DSP parameter values are excluded (gain, clipper, EQ, etc)
+    // I have not developed an accurate source of truth for those yet on either
+    // side, so saving now would mean silently saving possibly wrong values.
+    const handleSave = async () => {
+        if (!window.audiomix?.project?.save) {
+            console.warn("[AudioMIX] project.save not available");
+            return;
+        }
+        const projectData = {
+            projectName,
+            bpm: transport.bpm,
+            snap: transport.snap,
+            tracks,
+        };
+        const result = await window.audiomix.project.save(projectData);
+        if (!result.ok && result.error !== "cancelled") {
+            console.error("[AudioMIX] Save failed:", result.error);
+        }
+    };
+
+    const handleLoad = async () => {
+        if (!window.audiomix?.project?.load) {
+            console.warn("[AudioMIX] project.load not available");
+            return;
+        }
+        const result = await window.audiomix.project.load();
+        if (!result.ok) {
+            if (result.error != "cancelled") {
+                console.error("[AudioMIX] Load failed:", result.error);
+            }
+            return;
+        }
+        const { projectData } = result;
+        if (projectData?.projectName) setProjectName(projectData.projectName);
+        if (typeof projectData?.bpm === "number") transport.setBpm(projectData.bpm);
+        if (typeof projectData?.snap === "string") transport.setSnap(projectData.snap);
+        if (Array.isArray(projectData?.tracks)) loadTracks(projectData.tracks);
+    };
 
     // Debug
     React.useEffect(() => {
@@ -48,6 +94,9 @@ export default function App() {
                 mode={mode}
                 onModeChange={setMode}
                 project={PROJECT}
+                onRename={setProjectName}
+                onSave={handleSave}
+                onLoad={handleLoad}
             />
 
             {/* Main body */}

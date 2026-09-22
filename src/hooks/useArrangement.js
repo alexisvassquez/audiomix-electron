@@ -66,7 +66,7 @@ export function useArrangement() {
         // real to play.
         // clip_add()'s params are positional-or-keyword, so passing bank as
         // the 4th positional arg matches its signature
-        // matches the quoting style parse_and_execute() already expects.
+        // matches the quoting style the AudioScript runtime already expects.
         const command = `clip.add("${clipId}", "sampler", "${alias}", "${bank}")`;
         if (window.audiomix?.shell?.sendCommand) {
             window.audiomix.shell.sendCommand(command);
@@ -75,7 +75,7 @@ export function useArrangement() {
         }
     }, []);
 
-    {/** Overlap clips, drag and drop */}
+    // Overlap clips, drag and drop
     const moveClip = useCallback((trackId, clipId, newStart) => {
         setTracks(prev => prev.map(tr => {
             if (tr.id !== trackId) return tr;
@@ -117,5 +117,27 @@ export function useArrangement() {
         ));
     }, []);
 
-    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute, toggleSolo };
+    // Replaces the entire tracks state w/ a loaded project's saved
+    // arrangement.
+    // Also bumps nextClipId past the highest numeric id found in the
+    // loaded data so that a clip placed after loading can never collide
+    // w/ a restored one.
+    // Counter is a plain module-level variable, not tied to component
+    // lifetime.
+    // This is because a loaded proejct's ids (which may already be high) would
+    // otherwise get reused by the very next addClip call.
+    const loadTracks = useCallback((loadedTracks) => {
+        let maxId = nextClipId;
+        for (const tr of loadedTracks) {
+            for (const c of tr.clips) {
+                if (typeof c.id === "number" && c.id >= maxId) {
+                    maxId = c.id + 1;
+                }
+            }
+        }
+        nextClipId = maxId;
+        setTracks(loadedTracks);
+    }, []);
+
+    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks };
 }
