@@ -63,6 +63,7 @@ export default function RightPanel({ dsp }) {
                         max={24}
                         step={0.5}
                         unit="dB"
+                        size={60}
                         onChange={dsp.updateGain}
                     />
                 </div>
@@ -79,6 +80,7 @@ export default function RightPanel({ dsp }) {
                         max={24}
                         step={0.5}
                         unit="dB"
+                        size={50}
                         onChange={dsp.updateClipDrive}
                     />
                     <Knob 
@@ -88,6 +90,7 @@ export default function RightPanel({ dsp }) {
                         max={0}
                         step={0.1}
                         unit="dB"
+                        size={50}
                         onChange={dsp.updateClipCeiling}
                     />
                     <Knob 
@@ -96,6 +99,7 @@ export default function RightPanel({ dsp }) {
                         min={0}
                         max={1}
                         step={0.01}
+                        size={50}
                         onChange={dsp.updateClipMix}
                     />
                 </div>

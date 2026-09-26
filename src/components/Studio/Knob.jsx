@@ -59,7 +59,7 @@ export default function Knob({
             // up is negative clientY delta, so subtract to make
             // up=increase
             const deltaPx = startY - moveEvent.clientY;
-            const defaultValue = (deltaPx / FULL_SWEEP_PX) * range;
+            const deltaValue = (deltaPx / FULL_SWEEP_PX) * range;
             const next = quantize(clamp(startValue + deltaValue));
 
             if (next !== lastSent) {
