@@ -1,0 +1,217 @@
+{
+  "projectName": "OOEPUI_NIGHT_01",
+  "bpm": 138,
+  "snap": "1/4",
+  "tracks": [
+    {
+      "id": 0,
+      "name": "KICK",
+      "type": "drum",
+      "color": "#00ff9f",
+      "clips": [
+        {
+          "id": "0-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 0,
+          "len": 2
+        },
+        {
+          "id": "0-seed-1",
+          "bank": null,
+          "sampleRef": null,
+          "start": 4,
+          "len": 2
+        },
+        {
+          "id": "0-seed-2",
+          "bank": null,
+          "sampleRef": null,
+          "start": 8,
+          "len": 2
+        },
+        {
+          "id": "0-seed-3",
+          "bank": null,
+          "sampleRef": null,
+          "start": 12,
+          "len": 2
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 1,
+      "name": "SNARE",
+      "type": "drum",
+      "color": "#4d9fff",
+      "clips": [
+        {
+          "id": "1-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 2,
+          "len": 2
+        },
+        {
+          "id": "1-seed-1",
+          "bank": null,
+          "sampleRef": null,
+          "start": 6,
+          "len": 2
+        },
+        {
+          "id": "1-seed-2",
+          "bank": null,
+          "sampleRef": null,
+          "start": 10,
+          "len": 2
+        },
+        {
+          "id": "1-seed-3",
+          "bank": null,
+          "sampleRef": null,
+          "start": 14,
+          "len": 2
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 2,
+      "name": "BASS STB",
+      "type": "synth",
+      "color": "#ff6ac1",
+      "clips": [
+        {
+          "id": "2-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 0,
+          "len": 4
+        },
+        {
+          "id": "2-seed-1",
+          "bank": null,
+          "sampleRef": null,
+          "start": 6,
+          "len": 6
+        },
+        {
+          "id": "2-seed-2",
+          "bank": null,
+          "sampleRef": null,
+          "start": 14,
+          "len": 2
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 3,
+      "name": "LEAD SYN",
+      "type": "synth",
+      "color": "#7c6af7",
+      "clips": [
+        {
+          "id": "3-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 4,
+          "len": 8
+        },
+        {
+          "id": "3-seed-1",
+          "bank": null,
+          "sampleRef": null,
+          "start": 13,
+          "len": 3
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 4,
+      "name": "CHORD PAD",
+      "type": "synth",
+      "color": "#ff4455",
+      "clips": [
+        {
+          "id": "4-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 0,
+          "len": 16
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 5,
+      "name": "VOCAL CHOP",
+      "type": "audio",
+      "color": "#00cfff",
+      "clips": [
+        {
+          "id": "5-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 3,
+          "len": 2
+        },
+        {
+          "id": "5-seed-1",
+          "bank": null,
+          "sampleRef": null,
+          "start": 7,
+          "len": 1
+        },
+        {
+          "id": "5-seed-2",
+          "bank": null,
+          "sampleRef": null,
+          "start": 11,
+          "len": 4
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 6,
+      "name": "FX RISER",
+      "type": "audio",
+      "color": "#f1fa8c",
+      "clips": [
+        {
+          "id": "6-seed-0",
+          "bank": null,
+          "sampleRef": null,
+          "start": 14,
+          "len": 2
+        }
+      ],
+      "muted": false,
+      "solo": false
+    },
+    {
+      "id": 7,
+      "name": "MASTER BUS",
+      "type": "bus",
+      "clips": [],
+      "muted": false,
+      "solo": false
+    }
+  ],
+  "dsp": {
+    "gainDb": 24,
+    "clipDrive": 0,
+    "clipCeiling": -0.1,
+    "clipMix": 1
+  }
+}

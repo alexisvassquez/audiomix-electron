@@ -31,6 +31,58 @@ The AudioMIX core engine has its own separate changelog in the [AudioMIX Core re
 
 ---
 
+## [0.5.0] — 2026-09-26
+
+### Added
+
+- **DSP control panel (right side).** New `RightPanel.jsx` — a
+  STUDIO-mode panel housing the first tactile DSP controls, styled to
+  match the existing left Sidebar (section dividers, panel header,
+  tokens.css conventions) so it reads as native. Currently holds a
+  Master/Gain knob and a Clipper section (Drive, Ceiling, Mix).
+- **Reusable Knob component.** `Knob.jsx` — a generic vertical-drag
+  rotary knob (drag up = increase, DAW convention). Takes
+  `min`/`max`/`step`/`unit`/`size` props so it's reusable across any
+  single-float DSP parameter. Renders a rotary pointer that sweeps 270°,
+  a live value readout, and supports double-click-to-reset (to range
+  midpoint).
+  - Command sends are throttled: the knob's visual position updates on
+    every mousemove, but the actual DSP command only fires when the
+    quantized value crosses a step boundary — so a fast drag can't
+    flood the NDJSON bridge with hundreds of near-identical commands.
+- **`useDsp` hook.** Owns frontend DSP parameter state and sends the
+  matching AudioScript command (`gain.set(gain_db=...)`,
+  `clipper.set(...)`) over the bridge on change. Uses the new
+  keyword-argument command syntax rather than positional. Knob defaults
+  mirror the C++ module boot defaults in `main.cpp`.
+- **DSP state persistence.** `.audiomix` project files now save and
+  restore all four DSP knob values alongside the arrangement. On load,
+  `loadDspState()` both updates the knobs *and* re-sends each command
+  to the C++ engine, so the audio engine matches the restored UI rather
+  than only the knob positions moving.
+
+### Changed
+
+- `App.jsx` — mounts `<RightPanel />` in the main body flex row (right
+  of the canvas column, full height); instantiates `useDsp`; includes
+  DSP state in the save payload and restores it on load.
+
+### Notes
+
+- DSP persistence is safe against older `.audiomix` files that predate
+  it: `loadDspState()` no-ops on a missing or partial `dsp` field
+  rather than erroring or setting knobs to `undefined`.
+- These knobs are **write-only** by design — the C++ engine has no
+  query-back path (same limitation documented for `gain.py`'s
+  `gain_status()`). This no longer matters for persistence: the UI is
+  now the authoritative source of truth for DSP intent, and the engine
+  is kept in sync by re-sending on load.
+- First knobs in the DAW — Phase 4 ("DSP in the UI") of the roadmap is
+  now underway. EQ and Compressor knobs are deferred (multi-param,
+  messier to knob-ify) until the single-float pattern is proven.
+
+---
+
 ## [0.4.0] — 2026-07-31
 
 ### Added
