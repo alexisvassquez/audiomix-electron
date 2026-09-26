@@ -4,9 +4,7 @@
 // Holds DSP param state and sends the matching AudioScript
 // command over the bridge on change.
 // This is the frontend's local echo of DSP intent.
-// TODO: C++ engine needs query-back path
-// This drives the knobs for now, need persistence
-// and restoring on load.
+// Saves DSP values to project files
 
 import { useState, useCallback } from "react";
 
@@ -48,10 +46,44 @@ export function useDsp() {
         sendCommand(`clipper.set(mix=${v})`);
     }, []);
 
+    // Restores DSP state from a loaded project.
+    // Tolerant of missing fields (no dsp key at all or partial)
+    // Keeps the current default for anything absent, rather than setting
+    // a knob to undefined.
+    // Also resends each command to the engine, loading a project has to
+    // push the restored values down to cpp, not just move knobs visually
+    // or else audio wouldn't match the UI until each knob was manually turned.
+    const loadDspState = useCallback((saved) => {
+        if (!saved || typeof saved !== "object") return;
+
+        if (typeof saved.gainDb === "number") {
+            setGainDb(saved.gainDb);
+            sendCommand(`gain.set(gain_db=${saved.gainDb})`);
+        }
+        if (typeof saved.clipDrive === "number") {
+            setClipDrive(saved.clipDrive);
+            sendCommand(`clipper.set(drive_db=${saved.clipDrive})`);
+        }
+        if (typeof saved.clipCeiling === "number") {
+            setClipCeiling(saved.clipCeiling);
+            sendCommand(`clipper.set(ceiling_db=${saved.clipCeiling})`);
+        }
+        if (typeof saved.clipMix === "number") {
+            setClipMix(saved.clipMix);
+            sendCommand(`clipper.set(mix=${saved.clipMix})`);
+        }
+    }, []);
+
+    // snapshot of current values, for saving into a project file
+    const getDspState = useCallback(() => ({
+        gainDb, clipDrive, clipCeiling, clipMix,
+    }), [gainDb, clipDrive, clipCeiling, clipMix]);
+
     return {
         gainDb, updateGain,
         clipDrive, updateClipDrive,
         clipCeiling, updateClipCeiling,
         clipMix, updateClipMix,
+        loadDspState, getDspState,
     };
 }

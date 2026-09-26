@@ -34,9 +34,11 @@ export default function App() {
 
     // Gathers everything persisted in v1: arrangement, project name,
     // BPM/snap.
-    // TODO: DSP parameter values are excluded (gain, clipper, EQ, etc)
-    // I have not developed an accurate source of truth for those yet on either
-    // side, so saving now would mean silently saving possibly wrong values.
+    // DSP is saved now that the knobs are the frontend source of truth.
+    // useDsp's values are what the user set (persistence)
+    // Still working on query-back from cpp engine but can now be saved w/o
+    // UI is authoritative, loadDspState resends the values to the engine on
+    // load to keep in sync.
     const handleSave = async () => {
         if (!window.audiomix?.project?.save) {
             console.warn("[AudioMIX] project.save not available");
@@ -47,6 +49,7 @@ export default function App() {
             bpm: transport.bpm,
             snap: transport.snap,
             tracks,
+            dsp: dsp.getDspState(),
         };
         const result = await window.audiomix.project.save(projectData);
         if (!result.ok && result.error !== "cancelled") {
@@ -71,6 +74,8 @@ export default function App() {
         if (typeof projectData?.bpm === "number") transport.setBpm(projectData.bpm);
         if (typeof projectData?.snap === "string") transport.setSnap(projectData.snap);
         if (Array.isArray(projectData?.tracks)) loadTracks(projectData.tracks);
+        // no-ops on a missing/partial dsp field rather than erroring
+        dsp.loadDspState(projectData?.dsp);
     };
 
     // Debug
