@@ -14,6 +14,8 @@ import Arrangement from "./components/Studio/Arrangement.jsx";
 import ShellDock from "./components/ShellDock.jsx";
 import { useArrangement } from "./hooks/useArrangement.js";
 import { usePlaybackScheduler } from "./hooks/usePlaybackScheduler.js";
+import { useDsp } from "./hooks/useDsp.js";
+import RightPanel from "./components/Studio/RightPanel.jsx";
 
 const DEFAULT_PROJECT_NAME = "OOEPUI_NIGHT_01";
 
@@ -28,6 +30,7 @@ export default function App() {
     const transport = useTransport();
     const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks } = useArrangement();
     usePlaybackScheduler(tracks, transport.playhead, transport.playing);
+    const dsp = useDsp();
 
     // Gathers everything persisted in v1: arrangement, project name,
     // BPM/snap.
@@ -136,6 +139,9 @@ export default function App() {
                         and Transport */}
                     <ShellDock />
                 </div>
+
+                {/* Right-side DSP panel - master gain + clipper knobs */}
+                <RightPanel dsp={dsp} />
             </div>
 
             {/* Transport - always visible */}
