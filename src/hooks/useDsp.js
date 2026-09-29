@@ -6,7 +6,6 @@
 // This is the frontend's local echo of DSP intent.
 // Saves DSP values to project files.
 
-import { cp } from "original-fs";
 import { useState, useCallback } from "react";
 
 function sendCommand(command) {
