@@ -14,6 +14,8 @@ AudioMIX is not a traditional DAW. It is a **Creative Operating Layer** — a un
 
 ---
 
+![AudioMIX Current State](design/screenshots/current_state.png)
+
 ## Architecture
 
 AudioMIX Electron is built on a secure, modular Electron architecture with a React renderer powered by Vite.
