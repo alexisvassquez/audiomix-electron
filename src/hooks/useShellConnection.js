@@ -42,6 +42,9 @@ export function useShellConnection() {
     */
     const [lastError, setLastError] = useState(null);
 
+    /* Tells client if backend engine is ready */
+    const [engineReady, setEngineReady] = useState(false);
+
     /* Holds the unsubscribe functions returned by the preload API's
       onMessage/onStatus listeners, so they can be cleaned up on unmount
       without leaking IPC listeners across re-renders.
@@ -79,6 +82,13 @@ export function useShellConnection() {
             case "pong":
                 // Keepalive acknowledgment only, no state to update
                 break;
+            case "engine_ready":
+                // Backend finished its SAFE_MODE boot.
+                // Safe to enable control that need a live runtime.
+                // Server may send this both as a connect-time direct message
+                // a boot-time broadcast.
+                setEngineReady(true);
+                break; 
             default:
                 // Unrecognized type - ignore rather than throw in case the
                 // backend adds a new WSMessageType before the renderer is
@@ -97,7 +107,7 @@ export function useShellConnection() {
     unsubsRef.current = [unsubMessage, unsubStatus];
 
     // Cleanup on unmount: mark cancelled so the isConnected() promise
-    // above becomes a no-op if it resolves late
+    // above becomes a no-op if it resolves late.
     // Removes both IPC listeners so they don't keep firing (and/or leaking)
     // after this component is gone.
     return () => {
@@ -149,5 +159,5 @@ export function useShellConnection() {
     return window.audiomix.shell.exitLive();
    }, []);
 
-    return { connected, session, lastOutput, lastError, sendCommand, enterLive, exitLive };
+    return { connected, session, lastOutput, lastError, sendCommand, enterLive, exitLive, engineReady };
 }
