@@ -16,6 +16,7 @@ import { useArrangement } from "./hooks/useArrangement.js";
 import { usePlaybackScheduler } from "./hooks/usePlaybackScheduler.js";
 import { useDsp } from "./hooks/useDsp.js";
 import RightPanel from "./components/Studio/RightPanel.jsx";
+import { useShellConnection } from "./hooks/useShellConnection.js";
 
 const DEFAULT_PROJECT_NAME = "OOEPUI_NIGHT_01";
 
@@ -31,6 +32,12 @@ export default function App() {
     const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks } = useArrangement();
     usePlaybackScheduler(tracks, transport.playhead, transport.playing);
     const dsp = useDsp();
+
+    // Single shell connection for the whole application.
+    // ShellDock and StatusBar both read from this one instance (passed down
+    // as props) rather than each opening its own IPC subscription to the
+    // backend.
+    const shell = useShellConnection();
 
     // Gathers everything persisted in v1: arrangement, project name,
     // BPM/snap.
@@ -141,8 +148,18 @@ export default function App() {
                     />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement
-                        and Transport */}
-                    <ShellDock />
+                        and Transport.
+                        Fed from the single shell connection. */}
+                    <ShellDock 
+                        connected={shell.connected}
+                        session={shell.session}
+                        lastOutput={shell.lastOutput}
+                        lastError={shell.lastError}
+                        engineReady={shell.engineReady}
+                        sendCommand={shell.sendCommand}
+                        enterLive={shell.enterLive}
+                        exitLive={shell.exitLive}    
+                    />
                 </div>
 
                 {/* Right-side DSP panel - master gain + clipper knobs */}
@@ -164,7 +181,10 @@ export default function App() {
                 onBpmChange={transport.setBpm}
             />
 
-            {/* Status bar - always visible */}
+            {/* Status bar - always visible.
+                engineOnline now reflects real runtime readiness, not
+                whether transport is playing.
+                engine_ready signal */}
             <StatusBar
                 mode={mode}
                 project={projectName}

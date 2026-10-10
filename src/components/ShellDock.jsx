@@ -4,29 +4,24 @@
 /* The AS Shell panel
    A collapsible dock living at the bottom of STUDIO mode,
    below the Arrangement and above the Transport row.
-   Talks to the FastAPI bridge exclusively through
-   useShellConnection(), which itself only talks to
-   window.audiomix.shell (exposed by preload).
 
-   Reuses the app's existing .am-panel-header / .am-panel-title / .am-btn
-   utility classes from src/styles/tokens.css so this panel reads as
-   native to the rest of AudioMIX rather than a bolted-on piece with its
-   own visual language.
+   The shell connection is owned by App.jsx and passed in as props so that
+   this panel and StatusBar share a single backend subscription.
+   useShellConnection is one instance for the whole application.
 
    This component owns its own local command log (an array of entries),
    since useShellConnection only exposes the latest lastOutput/session
    update, not history.
-   Every submitted command and every result/error that arrives gets 
-   appended here.
 
-   NOTE: the IR/LIVE toggle currently only *displays* the branch from
-   session.audioscript_branch
-   Clicking it does not yet call /shell/live/enter or /shell/live/exit. 
-   That wiring is a deliberate follow-up step, not done here.
-   TODO
+   Input, Send, and the IR/LIVE toggle are disabled until engineReady is true.
+   The backend runtime boots a few seconds after launch and firing a command
+   before it's up is the race condition we close here.
+
+   The IR/LIVE toggle displays the branch from session.audioscript_branch and
+   calls /shell/live/enter or /exit via enter/exitLive.
 */
+
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useShellConnection } from "../hooks/useShellConnection";
 import "../styles/ShellDock.css";
 
 function timestamp() {
@@ -42,9 +37,15 @@ function nextLogId() {
     return logIdCounter;
 }
 
-export default function ShellDock() {
-    const { connected, session, lastOutput, lastError, sendCommand, enterLive, exitLive } = useShellConnection();
-
+export default function ShellDock(
+    connected, 
+    session, 
+    lastOutput, 
+    lastError, 
+    sendCommand, 
+    enterLive, 
+    exitLive,
+) {
     const [open, setOpen] = useState(true);
     const [inputValue, setInputValue] = useState("");
     const [log, setLog] = useState([
@@ -76,6 +77,13 @@ export default function ShellDock() {
         appendLog("system", connected ? "connected to bridge" : "disconnected from bridge");
     }, [connected]);
 
+    // Log when the engine finishes booting.
+    // Fires on the false->true transition and again if a reconnect re-readies
+    // the runtime.
+    useEffect(() => {
+        if (engineReady) appendLog("system", "engine ready");
+    }, [engineReady]);
+
     // Log a new shell_output result the moment it arrives
     useEffect(() => {
         if (lastOutput && lastOutput !== lastLoggedOutput.current) {
@@ -98,7 +106,14 @@ export default function ShellDock() {
         }
     }, [lastError]);
 
+    // Gating: nothing that talks to the runtime is allowed until the
+    // socket is up AND the engine has signaled ready.
+    const engineBooting = connected && !engineReady;
+    const inputDisabled = !connected || !engineReady;
+
     const handleSubmit = () => {
+        // if engine not ready, swallow the send
+        if (inputDisabled) return;
         const command = inputValue.trim();
         if (!command) return;
 
@@ -128,6 +143,12 @@ export default function ShellDock() {
 
     const branch = session?.audioscript_branch ?? "ir";
 
+    // The branch toggle is disabled while a switch is in flight or while
+    // the engine is still booting.
+    // Entering LIVE before the runtime is up is the same race as sending a
+    // command early.
+    const controlsDisabled = branchPending || !engineReady;
+
     // Shared handler for both toggle halves.
     // `target` is "ir" or "live" - the branch that half represents.
     // Clicking the half that's already active is a no-op rather than
@@ -154,6 +175,9 @@ export default function ShellDock() {
         }
     };
 
+    // Status pill text: 3 states, not 2.
+    const statusText = !connected ? "disconnected" : engineReady ? "connected" : "booting...";
+
     return (
         <div className={`shell-dock ${open ? "open" : "closed"}`}>
             <div className="am-panel-header">
@@ -170,25 +194,25 @@ export default function ShellDock() {
                 <div className="dock-right">
                     <div 
                         className="branch-toggle" 
-                        title={branchPending ? "Switching..." : "Click IR or LIVE to switch branch"}
+                        title={!engineReady ? "Engine booting..." : branchPending ? "Switching..." : "Click IR or LIVE to switch branch"}
                         style={{ opacity: branchPending ? 0.6 : 1 }} 
                     >
                         <div className={`branch-slider ${branch === "live" ? "live" : ""}`} />
                         <div 
                             className={`branch-option ir ${branch === "ir" ? "active" : ""}`}
                             onClick={() => handleBranchClick("ir")}
-                            style={{ cursor: branchPending ? "wait" : "pointer" }}
+                            style={{ cursor: controlsDisabled ? "not-allowed" : "pointer" }}
                         >IR</div>
                         <div 
                             className={`branch-option live ${branch === "live" ? "active" : ""}`}
                             onClick={() => handleBranchClick("live")}
-                            style={{ cursor: branchPending ? "wait" : "pointer" }}
+                            style={{ cursor: controlsDisabled ? "not-allowed" : "pointer" }}
                         >LIVE</div>
                     </div>
                     <div className="am-divider-v" />
                     <div className="status-pill">
-                        <span className={`dot ${connected ? "" : "off"}`} />
-                        {connected ? "connected" : "disconnected"}
+                        <span className={`dot ${connected && engineReady ? "" : "off"}`} />
+                        {statusText}
                     </div>
                 </div>
             </div>
@@ -212,13 +236,19 @@ export default function ShellDock() {
                         <input
                             className="cmd-input"
                             type="text"
-                            placeholder="type an AudioScript command..."
+                            placeholder={engineBooting ? "engine booting..." : "type an AudioScript command..."}
                             autoComplete="off"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
+                            disabled={inputDisabled}
                         />
-                        <button type="button" className="am-btn primary" onClick={handleSubmit}>
+                        <button 
+                            type="button" 
+                            className="am-btn primary" 
+                            onClick={handleSubmit}
+                            disabled={inputDisabled}
+                        >
                             Send
                         </button>
                     </div>
