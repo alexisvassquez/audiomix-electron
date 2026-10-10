@@ -33,6 +33,8 @@ class ShellBridge {
         this.reconnectAttempt = 0;
         this.reconnectTimer = null;
         this.manuallyClosed = false;
+        // cached for renderers that subscribe late
+        this.engineReady = false;
 
         this._registerIpcHandlers();
         this.connect();
@@ -59,12 +61,17 @@ class ShellBridge {
                 this._emit("shell:status", { connected: true, parseError: true });
                 return;
             }
+            if (envelope.type === "engine_ready") {
+                this.engineReady = true;
+                console.log("[shellBridge] engine_ready received");
+            }
             // Message type below:
             // envelope: { type: "session_update" | "shell_output" | "error" | "pong", payload: {...} }
             this._emit("shell:message", envelope);
         });
 
         this.ws.on("close", (code) => {
+            this.engineReady = false;
             console.log(`[shellBridge] connection closed (code ${code})`);
             this._emit("shell:status", { connected: false });
             if (code === 4401) {
@@ -154,6 +161,7 @@ class ShellBridge {
         ipcMain.handle("shell:isConnected", () => {
             return this.ws?.readyState === WebSocket.OPEN;
         });
+        ipcMain.handle("shell:isEngineReady", () => this.engineReady);
         ipcMain.handle("shell:enterLive", () => this.enterLive());
         ipcMain.handle("shell:exitLive", () => this.exitLive());
     }

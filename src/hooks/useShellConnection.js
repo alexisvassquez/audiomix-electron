@@ -64,6 +64,15 @@ export function useShellConnection() {
         if (!cancelled) setConnected(status);
     });
 
+    // Pull current engine readiness directly.
+    // Covers the case where the engine signaled ready before this
+    // component subscribed.
+    // engine_ready push is one-shot (see shellBridge).
+    // Mirrors isConnected() above.
+    window.audiomix.shell.isEngineReady?.().then((ready) => {
+        if (!cancelled) setEngineReady(ready);
+    });
+
     // Subscribe to every WSMessage envelope forwarded from the backend.
     // Dispatches on envelope.type to keep state updates isolated per
     // message kind (see audiomix/api/models.py) rather than dumping

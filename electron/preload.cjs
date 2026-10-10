@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld("audiomix", {
     sendCommand: (command, branch = "live") =>
       ipcRenderer.invoke("shell:send", { command, branch }),
     isConnected: () => ipcRenderer.invoke("shell:isConnected"),
+    isEngineReady: () => ipcRenderer.invoke("shell:isEngineReady"),
     enterLive: () => ipcRenderer.invoke("shell:enterLive"),
     exitLive: () => ipcRenderer.invoke("shell:exitLive"),
     onMessage: (callback) => {
