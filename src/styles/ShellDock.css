@@ -208,7 +208,7 @@
     flex-shrink: 0;
 }
 
-.prompt-glpyh {
+.prompt-glyph {
     color: var(--accent);
 }
 
@@ -230,4 +230,29 @@
 }
 .cmd-input::placeholder {
     color: var(--text-muted);
+}
+
+/* Disabled state - engine still booting or socket down.
+   Input + Send grey out with a not-allowed cursor so "can't type yet"
+   reads clearly. 
+*/
+.cmd-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--surface-alt);
+}
+
+.input-row .am-btn.primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Booting - engine not ready yet.
+   Amber + faster pulse so it reads as "working", not to be confused with the
+   disconnected/error dot.
+*/
+.status-pill .dot.booting {
+    background: var(--warn);
+    animation: am-pulse 1.2s ease-in-out infinite;
+    box-shadow: none;
 }

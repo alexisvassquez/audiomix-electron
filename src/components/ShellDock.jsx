@@ -37,15 +37,16 @@ function nextLogId() {
     return logIdCounter;
 }
 
-export default function ShellDock(
+export default function ShellDock({
     connected, 
     session, 
     lastOutput, 
-    lastError, 
+    lastError,
+    engineReady, 
     sendCommand, 
     enterLive, 
     exitLive,
-) {
+}) {
     const [open, setOpen] = useState(true);
     const [inputValue, setInputValue] = useState("");
     const [log, setLog] = useState([
@@ -211,7 +212,7 @@ export default function ShellDock(
                     </div>
                     <div className="am-divider-v" />
                     <div className="status-pill">
-                        <span className={`dot ${connected && engineReady ? "" : "off"}`} />
+                        <span className={`dot ${!connected ? "off" : !engineReady ? "booting" : ""}`} />
                         {statusText}
                     </div>
                 </div>
