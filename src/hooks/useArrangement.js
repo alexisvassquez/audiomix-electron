@@ -6,7 +6,7 @@
 // state directly.
 
 import { useState, useCallback } from "react";
-import { TRACKS as INITIAL_TRACKS } from "../data/studioData.js";
+import { TRACKS as INITIAL_TRACKS, TRACK_COLORS } from "../data/studioData.js";
 
 // studioData.js clips have no id, so give each one a stable
 // id up front
@@ -117,6 +117,32 @@ export function useArrangement() {
         ));
     }, []);
 
+    // Append a new, empty track.
+    // Frontend only for now - a track touches the backend only once
+    // it has clips.
+    // New id is one past the highest existing numeric id so it stays unique
+    // across loads/removes.
+    // Color cycles the palette by id so it never lands on undefined.
+    const addTrack = useCallback(() => {
+        setTracks(prev => {
+            const maxId = prev.reduce(
+                (m, tr) => (typeof tr.id === "number" && tr.id > m ? tr.id : m), 
+                -1
+            );
+            const newId = maxId + 1;
+            const newTrack = {
+                id: newId,
+                name: `TRACK ${newId + 1}`,
+                type: "audio",
+                color: TRACK_COLORS[newId % TRACK_COLORS.length],
+                clips: [],
+                muted: false,
+                solo: false,
+            };
+            return [...prev, newTrack];
+        });
+    }, []);
+
     // Replaces the entire tracks state w/ a loaded project's saved
     // arrangement.
     // Also bumps nextClipId past the highest numeric id found in the
@@ -139,5 +165,5 @@ export function useArrangement() {
         setTracks(loadedTracks);
     }, []);
 
-    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks };
+    return { tracks, addClip, removeClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks, addTrack };
 }
