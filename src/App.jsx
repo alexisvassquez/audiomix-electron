@@ -29,7 +29,7 @@ export default function App() {
     const [projectName, setProjectName] = useState(DEFAULT_PROJECT_NAME);
 
     const transport = useTransport();
-    const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks } = useArrangement();
+    const { tracks, addClip, assignSample, moveClip, toggleMute, toggleSolo, loadTracks, addTrack } = useArrangement();
     usePlaybackScheduler(tracks, transport.playhead, transport.playing);
     const dsp = useDsp();
 
@@ -144,7 +144,8 @@ export default function App() {
                         onSeek={transport.seekTo}
                         onMoveClip={moveClip}
                         onToggleMute={toggleMute}
-                        onToggleSolo={toggleSolo} 
+                        onToggleSolo={toggleSolo}
+                        onAddTrack={addTrack} 
                     />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement
