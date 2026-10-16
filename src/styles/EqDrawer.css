@@ -1,0 +1,260 @@
+/* AudioMIX Electron */
+/* src/styles/EqDrawer.css */
+/* Horizontal collapsible EQ drawer.
+   Uses tokens from tokens.css;
+   --eq-cut (cut color) is scoped here so :root stays untouched.
+*/
+
+.eq-drawer {
+    --eq-cut: #4d9fff;
+    flex-shrink: 0;
+    border-top: 1px solid var(--border-bright);
+    background: linear-gradient(180deg, #101111 0%, var(--surface) 100%);
+    font-family: var(--font-mono);
+}
+
+.eq-head {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.eq-drawer.collapsed .eq-head {
+    border-bottom: none;
+}
+
+.eq-title {
+    font-size: 10px;
+    letter-spacing: .16em;
+    color: var(--text);
+    text-transform: uppercase;
+}
+.eq-badge {
+    font-size: 9px;
+    letter-spacing: .08em;
+    color: var(--accent);
+    border: 1px solid var(--accent-mid);
+    background: var(--accent-dim);
+    border-radius: 3px;
+    padding: 1px 6px;
+}
+.eq-head-ctl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.eq-spacer {
+    flex: 1;
+}
+
+.eq-preset, .eq-mini-btn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    background: var(--surface-alt);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    letter-spacing: .04em;
+}
+.eq-mini-btn:hover {
+    border-color: var(--accent-mid);
+    color: var(--accent);
+}
+
+.eq-hide-btn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 3px 9px;
+    cursor: pointer;
+}
+.eq-hide-btn:hover {
+    color: var(--text);
+}
+
+/* expanded body */
+.eq-body {
+    padding: 12px 14px 10px;
+}
+.eq-bands {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(10, minmax(44px, 1fr));
+}
+.eq-curve {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 20px;    /* clears the value label, aligns 0 dB to center */
+    height: 150px;
+    width: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.eqband {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: ns-resize;
+    user-select: none;
+    padding-bottom: 2px;
+}
+.eqband-val {
+    font-size: 10px;
+    height: 14px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+.eqband-val:pos {
+    color: var(--accent);
+}
+.eqband-val:neg {
+    color: var(--eq-cut);
+}
+.eqband-track {
+    position: relative;
+    width: 100%;
+    height: 150px;
+}
+.eqband-rail {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 2px;
+    background: #202020;
+}
+.eqband-zero {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 75px;
+    height: 1px;
+    background: #2e2e2e;
+}
+.eqband-fill {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    border-radius: 2px;
+    background: var(--accent);
+}
+.eqband-fill.neg {
+    background: var(--eq-cut);
+}
+.eqband-handle {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 9px;
+    border-radius: 3px;
+    background: var(--accent);
+    box-shadow: 0 0 10px -2px var(--accent);
+    border: 1px solid var(--bg);
+}
+.eqband-handle.neg {
+    background: var(--eq-cut);
+    box-shadow: 0 0 10px -2px var(--eq-cut);
+}
+.eqband-label {
+    font-size: 9px;
+    color: var(--text);
+    letter-spacing: .04em;
+}
+.eqband-hz {
+    font-size: 8px;
+    color: var(--text-muted);
+}
+
+/* character chips */
+.eq-foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+.eq-foot-label {
+    font-size: 9px;
+    letter-spacing: .14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+.eq-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.eq-chip {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .04em;
+    color: var(--text-dim);
+    background: var(--surface-alt);
+    border: 1px olid var(--border-bright);
+    border-radius: 999px;
+    padding: 3px 11px;
+    cursor: pointer;
+}
+.eq-chip:hover {
+    color: var(--text);
+    border-color: var(--accent-mid);
+}
+
+/* collapsed summary */
+.eq-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    height: 34px;
+}
+.eq-spark {
+    width: 120px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.eq-sum-text {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+.eq-sum-text .up {
+    color: var(--accent);
+}
+.eq-sum-text .dn {
+    color: var(--eq-cut);
+}
+.eq-sum-text .sep {
+    color: var(--text-muted);
+}
+.eq-sum-text .muted {
+    color: var(--text-muted);
+}
+
+.eq-sum-active {
+    font-size: 9px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    text-transform: uppercase;
+}
