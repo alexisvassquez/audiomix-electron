@@ -7,6 +7,7 @@
 // Saves DSP values to project files.
 
 import { useState, useCallback } from "react";
+import { EQ_BANDS } from "../data/eqBands";
 
 function sendCommand(command) {
     if (window.audiomix?.shell?.sendCommand) {
@@ -35,6 +36,10 @@ export function useDsp() {
     const [compKnee, setCompKnee] = useState(6.0);
     const [compMakeup, setCompMakeup] = useState(0.0);
     const [compMix, setCompMix] = useState(1.0);
+
+    // EQ - 10 bands, all flat at boot
+    // Matches engine's identity bands.
+    const [eqBands, setEqBands] = useState(() => EQ_BANDS.map(() => 0.0));
 
     const updateGain = useCallback((v) => {
         setGainDb(v);
@@ -91,13 +96,41 @@ export function useDsp() {
         sendCommand(`compressor.set(mix=${v})`);
     }, []);
 
+    // EQ: one band.
+    // Forwarder keeps the authoritative 10-band state and
+    // re-emits the full snapshot to Cpp, so we only send the one
+    // that moved.
+    const updateEqBand = useCallback((index, v) => {
+        setEqBands((prev) => {
+            const next = prev.slice();
+            next[index] = v;
+            return next;
+        });
+        const band = EQ_BANDS[index];
+        if (band) sendCommand(`eq.set("${band.key}", ${v})`);
+    }, []);
+
+    // EQ: apply a whole curve at once (presets, character chips).
+    // Sets local state and sends each band so the forwarder's snapshot
+    // matches the UI.
+    const applyEqValues = useCallback((values) => {
+        setEqBands(values.slice());
+        values.forEach((v, i) => {
+            const band = EQ_BANDS[i];
+            if (band) sendCommand(`eq.set("${band.key}", ${v})`);
+        });
+    }, []);
+
+    // EQ: flatten
+    // eq.reset() zeros every band in the forwarder in one call.
+    const resetEq = useCallback(() => {
+        setEqBands(EQ_BANDS.map(() => 0.0));
+        sendCommand(`eq.reset()`);
+    }, []);
+
     // Restores DSP state from a loaded project.
-    // Tolerant of missing fields (no dsp key at all or partial)
-    // Keeps the current default for anything absent, rather than setting
-    // a knob to undefined.
-    // Also resends each command to the engine, loading a project has to
-    // push the restored values down to cpp, not just move knobs visually
-    // or else audio wouldn't match the UI until each knob was manually turned.
+    // Tolerant of missing fields (no dsp key at all or partial).
+    // Resends each command so audio matches UI.
     const loadDspState = useCallback((saved) => {
         if (!saved || typeof saved !== "object") return;
 
@@ -146,6 +179,16 @@ export function useDsp() {
             setCompMix(saved.compMix);
             sendCommand(`compressor.set(mix=${saved.compMix})`);
         }
+
+        // EQ: accept a saved 10-length array
+        // resend each band.
+        if (Array.isArray(saved.eqBands)) {
+            const restored = EQ_BANDS.map((_, i) => typeof saved.eqBands[i] === "number" ? saved.eqBands[i] : 0.0);
+            setEqBands(restored);
+            restored.forEach((v, i) => {
+                sendCommand(`eq.set("${EQ_BANDS[i].key}", ${v})`);
+            });
+        }
     }, []);
 
     // snapshot of current values, for saving into a project file
@@ -155,7 +198,7 @@ export function useDsp() {
         compKnee, compMakeup, compMix,
     }), [gainDb, clipDrive, clipCeiling, clipMix,
         compThreshold, compRatio, compAttack, compRelease,
-        compKnee, compMakeup, compMix]);
+        compKnee, compMakeup, compMix, eqBands]);
 
     return {
         gainDb, updateGain,
@@ -169,6 +212,7 @@ export function useDsp() {
         compKnee, updateCompKnee,
         compMakeup, updateCompMakeup,
         compMix, updateCompMix,
+        eqBands, updateEqBand, applyEqValues, resetEq,
         loadDspState, getDspState,
     };
 }
