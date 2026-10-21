@@ -7,6 +7,11 @@
 // Each band sends eq.set("<band>", dB) via useDsp - cpp EqModule
 // does the work.
 // Collapsing is a VIEW operation only, engine keeps processing.
+// Drag to resize so it doesn't block the arrangement view.
+// Character chips are layers: the value shown/sent per band is your manual
+// base + the sum of active chips, clamped.
+// Chips stack, toggle off cleanly, and never corrupt a band the user edits by
+// hand.
 
 import React from "react";
 import { EQ_BANDS, EQ_MIN, EQ_MAX, EQ_PRESETS, EQ_PRESET_LABELS, EQ_CHIPS } from "../../data/eqBands.js";
@@ -14,8 +19,23 @@ import "../../styles/EqDrawer.css";
 
 const clamp = (v) => Math.max(EQ_MIN, Math.min(EQ_MAX, v));
 
-// Shared value -> curve mapping, svg overlay and sliders line up.
+// Sum of the nominal deltas of a set of active chip names, per band index.
+function chipDeltaSum(activeNames) {
+    const sum = new Array(EQ_BANDS.length).fill(0);
+    activeNames.forEach((name) => {
+        const chip = EQ_CHIPS.find((c) => c.name === name);
+        if (!chip) return;
+        Object.entries(chip.deltas).forEach(([key, d]) => {
+            const i = EQ_BANDS.findIndex((b) => b.key === key);
+            if (i >= 0) sum[i] += d;
+        });
+    });
+    return sum;
+}
+// value -> curve path in a fixed 1000 x h space
 // Amplitude is 0.88 of the 1/2-height, center is 0dB
+// CSS stretches it to the live track height so the drawn curve always
+// tracks the sliders.
 function curvePaths(values, h) {
     const cy = h / 2;
     const amp = cy * 0.88;
@@ -27,6 +47,7 @@ function curvePaths(values, h) {
 
 // full -12..+12 sweep over this much drag
 const SWEEP_PX = 150;
+
 function EqBandSlider({ index, band, value, trackH, onChange }) {
     const draggingRef = React.useRef(false);
     const cy = trackH / 2;
@@ -104,31 +125,63 @@ export default function EqDrawer({ dsp }) {
     const [preset, setPreset] = React.useState("flat");
     // resizable band height
     const [trackH, setTrackH] = React.useState(100);
-    const bands = dsp.eqBands;
 
+    // manual = hand-dialed base
+    // active = chip names layered on top
+    const [manual, setManual] = React.useState(() => dsp.eqBands.slice());
+    const [active, setActive] = React.useState([]);
+
+    const chipSum = React.useMemo(() => chipDeltaSum(active), [active]);
+    const bands = React.useMemo(() => manual.map((m, i) => clamp(m + chipSum[i])), [manual, chipSum]);
+    
+    // When nothing is layered, keep manual in step with the engine state
+    // covers project load setting dsp.eqBands from outside the drawer.
+    React.useEffect(() => {
+        if (active.length === 0) {
+            const eq = dsp.eqBands;
+            if (eq.some((v, i) => v !== manual[i])) setManual(eq.slice());
+        }
+    }, [dsp.eqBands]);
+
+    // Drag: 'v' is the desired TOTAL for this band.
+    // Back out the chip layer so the manual base stays independent, then send
+    // just this band.
     const onBand = (index, v) => {
+        setManual((prev) => {
+            const next = prev.slice();
+            next[index] = v - chipSum[index];
+            return next;
+        });
         dsp.updateEqBand(index, v);
         // a manual move = custom
         setPreset("");
     };
-    const onPreset = (e) => {
-        const name = e.target.value;
-        setPreset(name);
-        const vals = EQ_PRESETS[name];
-        if (vals) dsp.applyEqValues(vals);
-    };
+
     const onChip = (chip) => {
-        const next = bands.slice();
-        Object.entries(chip.deltas).forEach(([key, d]) => {
-            const i = EQ_BANDS.findIndex((b) => b.key === key);
-            if (i >= 0) next[i] = clamp(next[i] + d);
-        });
-        dsp.applyEqValues(next);
+        const on = active.includes(chip.name);
+        const nextActive = on ? active.filter((n) => n !== chip.name) : [...active, chip.name];
+        const nextSum = chipDeltaSum(nextActive);
+        const totals = manual.map((m, i) => clamp(m + nextSum[i]));
+        setActive(nextActive);
+        dsp.applyEqValues(totals);
         setPreset("");
     };
+
+    const onPreset = (e) => {
+        const name = e.target.value;
+        const vals = EQ_PRESETS[name];
+        if (!vals) return;
+        setManual(vals.slice());
+        setActive([]);
+        setPreset(name);
+        dsp.applyEqValues(vals)
+    };
+
     const onReset = () => {
-        dsp.resetEq();
+        setManual(EQ_BANDS.map(() => 0));
+        setActive([]);
         setPreset("flat");
+        dsp.resetEq();
     };
 
     // drag to resize
@@ -223,7 +276,7 @@ export default function EqDrawer({ dsp }) {
                         <span className="eq-foot-label">Character</span>
                         <div className="eq-chips">
                             {EQ_CHIPS.map((c) => (
-                                <button key={c.name} className="eq-chip" onClick={() => onChip(c)}>
+                                <button key={c.name} className={"eq-chip" + (active.includes(c.name) ? " on" : "")} onClick={() => onChip(c)}>
                                     {c.name}
                                 </button>
                             ))}

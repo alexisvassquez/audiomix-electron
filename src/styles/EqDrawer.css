@@ -235,13 +235,11 @@
     color: var(--text);
     border-color: var(--accent-mid);
 }
-.eq-chip:active,
-.eq-chip:focus {
+.eq-chip.on {
     color: var(--bg);
     background: var(--accent);
     border-color: var(--accent);
     font-weight: 600;
-    outline: none;
 }
 
 /* collapsed summary */
