@@ -20,7 +20,6 @@ export const EQ_BANDS = [
     { key: "brilliance", label: "BRIL", hz: "4k" },
     { key: "air", label: "AIR", hz: "8k" },
     { key: "sparkle", label: "SPKL", hz: "12k" },
-    { key: "sub_bass", label: "SUB", hz: "60" },
     { key: "ultra", label: "ULTR", hz: "16k" },
 ];
 
@@ -34,6 +33,7 @@ export const EQ_MAX = 12;
 // filter chains.
 // Refer to core engine repo.
 export const EQ_PRESETS = {
+    // SUB, BASS, LMID, MID, HMID, PRES, BRIL, AIR, SPKL, ULTR
     flat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     bass_boost: [6, 5, 2, 0, 0, 0, 0, 0, 0, 0],
     v_shape: [6, 5, 2, -1, -3, -1, 1, 3, 4, 2],

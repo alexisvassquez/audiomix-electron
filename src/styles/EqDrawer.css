@@ -13,6 +13,17 @@
     font-family: var(--font-mono);
 }
 
+/* resize grip at the top edge */
+.eq-resize {
+    height: 6px;
+    cursor: ns-resize;
+    background: repeating-linear-gradient(90deg, var(--text-muted) 0 2px, transparent 2px 6px) center / 40px 1px no-repeat;
+    opacity: .5;
+}
+.eq-resize:hover {
+    opacity: 1;
+}
+
 .eq-head {
     height: 30px;
     display: flex;
@@ -83,27 +94,32 @@
 
 /* expanded body */
 .eq-body {
-    padding: 12px 14px 10px;
+    padding: 10px 14px;
 }
-.eq-bands {
+
+/* curve lives here as an overlay */
+.eq-plot {
     position: relative;
-    display: grid;
-    grid-template-columns: repeat(10, minmax(44px, 1fr));
 }
 .eq-curve {
     position: absolute;
     left: 0;
     right: 0;
-    top: 20px;    /* clears the value label, aligns 0 dB to center */
-    height: 150px;
-    width: 100%;
+    top: 20px;
+    /* clears the value label, aligns 0 dB to center */
+    height: var(--eq-track-h, 100px);
     pointer-events: none;
     z-index: 1;
 }
-
-.eqband {
+.eq-bands {
     position: relative;
     z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(10, minmax(44px, 1fr));
+}
+
+
+.eqband {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -127,7 +143,7 @@
 .eqband-track {
     position: relative;
     width: 100%;
-    height: 150px;
+    height: var(--eq-track-h, 100px);
 }
 .eqband-rail {
     position: absolute;
@@ -143,7 +159,7 @@
     position: absolute;
     left: 14%;
     right: 14%;
-    top: 75px;
+    top: 50%;
     height: 1px;
     background: #2e2e2e;
 }
@@ -219,6 +235,14 @@
     color: var(--text);
     border-color: var(--accent-mid);
 }
+.eq-chip:active,
+.eq-chip:focus {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+    outline: none;
+}
 
 /* collapsed summary */
 .eq-summary {
@@ -233,7 +257,6 @@
     height: 22px;
     flex-shrink: 0;
 }
-
 .eq-sum-text {
     font-size: 10px;
     color: var(--text-dim);
@@ -251,7 +274,6 @@
 .eq-sum-text .muted {
     color: var(--text-muted);
 }
-
 .eq-sum-active {
     font-size: 9px;
     letter-spacing: .1em;

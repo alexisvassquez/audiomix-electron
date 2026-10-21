@@ -25,15 +25,11 @@ function curvePaths(values, h) {
     return { line, area };
 }
 
-// One vertical band slider.
-// Same vertical-drag + step-throttle idea as Knob
-// only fires onChange when the integer-dB value actually changes.
-const TRACK_H = 150;
 // full -12..+12 sweep over this much drag
 const SWEEP_PX = 150;
-function EqBandSlider({ index, band, value, onChange }) {
+function EqBandSlider({ index, band, value, trackH, onChange }) {
     const draggingRef = React.useRef(false);
-    const cy = TRACK_H / 2;
+    const cy = trackH / 2;
     const pxPerDb = (cy * 0.88) / EQ_MAX;
     const y = cy - value * pxPerDb;
     const neg = value < 0;
@@ -106,6 +102,8 @@ function EqBandSlider({ index, band, value, onChange }) {
 export default function EqDrawer({ dsp }) {
     const [open, setOpen] = React.useState(true);
     const [preset, setPreset] = React.useState("flat");
+    // resizable band height
+    const [trackH, setTrackH] = React.useState(100);
     const bands = dsp.eqBands;
 
     const onBand = (index, v) => {
@@ -133,12 +131,29 @@ export default function EqDrawer({ dsp }) {
         setPreset("flat");
     };
 
+    // drag to resize
+    const onResizeStart = (e) => {
+        e.preventDefault();
+        const startY = e.clientY;
+        const startH = trackH;
+        const move = (ev) => setTrackH(Math.max(70, Math.min(200, startH + (startY - ev.clientY))));
+        const up = () => {
+            window.removeEventListener("mousemove", move);
+            window.removeEventListener("mouseup", up);
+        };
+        window.addEventListener("mousemove", move);
+        window.addEventListener("mouseup", up);
+    };
+
     const curve = curvePaths(bands, 150);
     const spark = curvePaths(bands, 120);
     const ranked = bands.map((v, i) => ({ v, i })).filter((o) => Math.abs(o.v) >= 1).sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3);
 
     return (
-        <div className={"eq-drawer " + (open ? "open" : "collapsed")}>
+        <div className={"eq-drawer " + (open ? "open" : "collapsed")} style={{ "--eq-track-h": trackH + "px" }}>
+
+            {open && <div className="eq-resize" onMouseDown={onResizeStart} title="Drag to resize" />}
+
             <div className="eq-head">
                 <span className="eq-title">EQ</span>
                 <span className="eq-badge">10-BAND</span>
@@ -199,6 +214,7 @@ export default function EqDrawer({ dsp }) {
                                 index={i}
                                 band={b}
                                 value={bands[i]}
+                                trackH={trackH}
                                 onChange={onBand}    
                             />
                         ))}
