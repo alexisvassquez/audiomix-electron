@@ -14,7 +14,7 @@ AudioMIX is not a traditional DAW. It is a **Creative Operating Layer** — a un
 
 ---
 
-![AudioMIX Current State](design/screenshots/current_state.png)
+![AudioMIX Current State](design/screenshots/Screenshot_99.png)
 
 ## Architecture
 
