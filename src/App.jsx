@@ -17,6 +17,7 @@ import { usePlaybackScheduler } from "./hooks/usePlaybackScheduler.js";
 import { useDsp } from "./hooks/useDsp.js";
 import RightPanel from "./components/Studio/RightPanel.jsx";
 import { useShellConnection } from "./hooks/useShellConnection.js";
+import EqDrawer from "./components/Studio/EqDrawer.jsx";
 
 const DEFAULT_PROJECT_NAME = "OOEPUI_NIGHT_01";
 
@@ -147,6 +148,9 @@ export default function App() {
                         onToggleSolo={toggleSolo}
                         onAddTrack={addTrack} 
                     />
+
+                    {/* EQ drawer*/}
+                    <EqDrawer dsp={dsp} />
 
                     {/* AS Shell dock - collapsible, sits btwn Arrangement
                         and Transport.
